@@ -35,9 +35,14 @@ repository is catalogued but intentionally not cloned.
 
 | Pri | Local | Repository | Roadmap role |
 |---|---|---|---|
+| A | Link | [d2l-ai/d2l-en](https://github.com/d2l-ai/d2l-en) | executable mathematics, ML, deep-learning, attention, and systems prerequisites |
+| A | Link | [pytorch/tutorials](https://github.com/pytorch/tutorials) | official PyTorch beginner, profiler, compiler, and performance tutorials |
+| A | Link | [karpathy/nn-zero-to-hero](https://github.com/karpathy/nn-zero-to-hero) | code-first neural networks, backpropagation, and early language models |
+| A | R | [rasbt/LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch) | tokenization, attention, GPT, training, and generation from first principles |
+| A | R | [harvardnlp/annotated-transformer](https://github.com/harvardnlp/annotated-transformer) | executable line-by-line original Transformer |
+| A | Link | [huggingface/course](https://github.com/huggingface/course) | beginner-to-intermediate Transformers concepts and Hugging Face workflows |
 | A | L | [stanford-cs336/lectures](https://github.com/stanford-cs336/lectures) | model mechanics, profiling, Triton, and distributed foundations |
 | A | L | [gpu-mode/lectures](https://github.com/gpu-mode/lectures) | GPU architecture, kernels, collectives, and backend internals |
-| A | Link | [huggingface/course](https://github.com/huggingface/course) | beginner-to-intermediate Transformers concepts and Hugging Face workflows |
 | A | Link | [mryab/efficient-dl-systems](https://github.com/mryab/efficient-dl-systems) | profiling, compilation, distributed execution, deployment, and serving |
 | A | Link | [jax-ml/scaling-book](https://github.com/jax-ml/scaling-book) | Roofline, topology, sharding, TPU/JAX/XLA, and inference scaling |
 | B | Link | [llmsystem/llmsystem.github.io](https://github.com/llmsystem/llmsystem.github.io) | selective LLM lifecycle, acceleration, compression, and deployment |
@@ -55,15 +60,25 @@ default.
 
 | Pri | Local | Repository | Type | Read for |
 |---|---|---|---|---|
+| A | Link | [d2l-ai/d2l-en](https://github.com/d2l-ai/d2l-en) | interactive book source | tensor math, ML, MLPs, optimization, attention, and computational performance |
+| A | Link | [pytorch/tutorials](https://github.com/pytorch/tutorials) | official tutorial source | PyTorch basics, autograd, profiler, compile, and performance recipes |
+| A | Link | [karpathy/micrograd](https://github.com/karpathy/micrograd) | minimal autodiff engine | reverse-mode autodiff, computation graph, and MLP |
+| A | Link | [karpathy/nn-zero-to-hero](https://github.com/karpathy/nn-zero-to-hero) | video course + notebooks | neural networks, backpropagation, normalization, and character LMs |
+| A | Link | [mml-book/mml-book.github.io](https://github.com/mml-book/mml-book.github.io) | open mathematics book | formal linear algebra, probability, calculus, and optimization reference |
 | A | L | [huggingface/transformers](https://github.com/huggingface/transformers) | model-definition framework | canonical configs and readable model semantics across dense/MoE/SSM families |
 | A | Link | [huggingface/course](https://github.com/huggingface/course) | official course | tokenizers, Transformers, model use, fine-tuning, and ecosystem foundations |
 | A | R | [rasbt/LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch) | tutorial/reference | build decoder, tokenizer and training loop from first principles |
 | A | R | [harvardnlp/annotated-transformer](https://github.com/harvardnlp/annotated-transformer) | tutorial/reference | line-by-line original Transformer |
+| A | Link | [karpathy/minbpe](https://github.com/karpathy/minbpe) | compact tokenizer course | BPE training, encoding, regex splitting, and special tokens |
 | A | L | [stanford-cs336/lectures](https://github.com/stanford-cs336/lectures) | course | language modeling, scaling, systems and inference |
 | A | L | [gpu-mode/lectures](https://github.com/gpu-mode/lectures) | course | GPU profiling, kernels, communication |
 | B | Link | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | minimal training code | compact GPT training baseline |
 | B | Link | [karpathy/llm.c](https://github.com/karpathy/llm.c) | C/CUDA teaching system | raw training kernels and runtime mechanics |
-| B | Link | [meta-pytorch/gpt-fast](https://github.com/meta-pytorch/gpt-fast) | minimal inference | compact PyTorch-native generation and compilation |
+| B | Link | [pytorch-labs/gpt-fast](https://github.com/pytorch-labs/gpt-fast) | minimal inference | compact PyTorch-native generation, cache, TP, and compilation |
+| B | Link | [fastai/fastbook](https://github.com/fastai/fastbook) | top-down deep-learning book | optional application-first introduction |
+| B | Link | [mrdbourke/pytorch-deep-learning](https://github.com/mrdbourke/pytorch-deep-learning) | extended PyTorch course | slower code-heavy framework path |
+| B | Link | [stanford-cs336/assignment1-basics](https://github.com/stanford-cs336/assignment1-basics) | model implementation task | tokenizer, Transformer, optimizer, and correctness tests |
+| B | Link | [stanford-cs336/assignment2-systems](https://github.com/stanford-cs336/assignment2-systems) | systems implementation task | profiling, optimized attention, distributed execution, and tests |
 | B | Link | [huggingface/nanotron](https://github.com/huggingface/nanotron) | distributed training reference | minimal 3D-parallel training |
 | B | Link | [allenai/OLMo-core](https://github.com/allenai/OLMo-core) | open model building blocks | inspect modern model/training components |
 | C | Link | [meta-llama/llama-models](https://github.com/meta-llama/llama-models) | official utilities | Llama model utilities and reference material |
@@ -93,9 +108,12 @@ default.
 
 | Pri | Local | Repository | Layer | Best use / warning |
 |---|---|---|---|---|
+| A | Link | [GeeeekExplorer/nano-vllm](https://github.com/GeeeekExplorer/nano-vllm) | compact Python engine | shortest scheduler, block manager, model runner, and sampling trace |
+| A | Link | [sgl-project/mini-sglang](https://github.com/sgl-project/mini-sglang) | compact modern engine | radix cache, chunked prefill, overlap scheduling, TP, and JIT kernels |
 | A | L | [vllm-project/vllm](https://github.com/vllm-project/vllm) | engine + API server | scheduler, paged KV, model runner, distributed inference |
 | A | L | [sgl-project/sglang](https://github.com/sgl-project/sglang) | engine + language/runtime | radix cache, structured programs, optimized serving |
 | A | L | [NVIDIA/TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM) | NVIDIA engine/runtime | vendor-optimized precision, kernels, multi-GPU runtime |
+| B | Link | [jmaczan/tiny-vllm](https://github.com/jmaczan/tiny-vllm) | C++/CUDA engine course | safetensors, Llama forward, KV, continuous batching, online softmax, PagedAttention |
 | B | Link | [ggml-org/llama.cpp](https://github.com/ggml-org/llama.cpp) | C/C++ local inference | CPU/consumer hardware, GGUF, edge/server design |
 | B | Link | [InternLM/lmdeploy](https://github.com/InternLM/lmdeploy) | deployment/serving | compression + TurboMind serving |
 | B | Link | [mlc-ai/mlc-llm](https://github.com/mlc-ai/mlc-llm) | compiled deployment engine | compiler-driven multi-platform inference |
@@ -152,6 +170,8 @@ default.
 
 | Pri | Local | Repository | Focus | Notes |
 |---|---|---|---|---|
+| A | L | [gpu-mode/lectures](https://github.com/gpu-mode/lectures) | GPU course code/slides | profiling, CUDA, reductions, Triton, FlashAttention, collectives, and fusion |
+| A | Link | [gpu-mode/resource-stream](https://github.com/gpu-mode/resource-stream) | curated GPU resources | CUDA, Triton, compiler, extension, and systems references |
 | A | L | [Dao-AILab/flash-attention](https://github.com/Dao-AILab/flash-attention) | exact attention kernels | prefill IO-aware attention baseline |
 | A | L | [flashinfer-ai/flashinfer](https://github.com/flashinfer-ai/flashinfer) | LLM serving kernels | paged/decode attention, sampling, GEMM/MoE paths |
 | A | R | [triton-lang/triton](https://github.com/triton-lang/triton) | GPU DSL/compiler | implement and autotune custom kernels |
@@ -169,6 +189,7 @@ default.
 | B | Link | [tile-ai/tilelang](https://github.com/tile-ai/tilelang) | kernel DSL | alternative high-performance kernel authoring |
 | B | Link | [pytorch/FBGEMM](https://github.com/pytorch/FBGEMM) | GEMM/quant/MoE primitives | production low-precision/grouped operations |
 | B | Link | [NVIDIA/TransformerEngine](https://github.com/NVIDIA/TransformerEngine) | Transformer low precision | FP8 and distributed model components |
+| B | Link | [srush/Triton-Puzzles](https://github.com/srush/Triton-Puzzles) | Triton exercises | compact kernel-programming progression |
 | C | Link | [NVIDIA/cuda-samples](https://github.com/NVIDIA/cuda-samples) | CUDA examples | API and optimization exercises |
 | C | Link | [microsoft/BitBLAS](https://github.com/microsoft/BitBLAS) | mixed-precision matmul | useful paper/code history; **Archived** |
 | C | Link | [ROCm/composable_kernel](https://github.com/ROCm/composable_kernel) | AMD kernel templates | **Moved/deprecated mirror**; use `rocm-libraries` |

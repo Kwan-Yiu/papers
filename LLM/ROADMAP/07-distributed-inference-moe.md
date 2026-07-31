@@ -1,10 +1,9 @@
 # Distributed Inference and Mixture-of-Experts
 
-> Goal: understand dense and sparse distributed inference from topology to end-to-end serving.
->
-> Snapshot: 2026-07-31
->
-> Read after: [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
+> **Role:** curated entry map plus a research taxonomy for dense and sparse distributed inference
+> **Target:** connect parallelism, topology, collectives, disaggregation, MoE routing, kernels, and online serving to papers and source code
+> **Format:** external English tutorials/documentation/repositories for foundations; paper-and-code taxonomy for MoE
+> **Read after:** [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
 
 [Roadmap index](README.md) ·
 [Overview](00-roadmap.md) ·
@@ -18,7 +17,7 @@
 
 | Sections | Focus |
 |---|---|
-| 0 | dense distributed-inference foundations |
+| 0 | curated dense distributed-inference reading map |
 | 1–3 | mathematical model, routing taxonomy, and load balancing |
 | 4–7 | execution pipeline, prefill/decode behavior, kernels, and communication |
 | 8–10 | parallelism composition, placement, offload, and online serving |
@@ -28,199 +27,175 @@
 
 ---
 
-## 0. Distributed Inference Foundations
+## 0. Dense Distributed Inference — Curated Reading Map
 
-### 0.1 Why distribute inference
+This section does not teach distributed execution from scratch. It specifies which external sources
+to use, which repository paths to inspect, and what evidence is required before entering the MoE
+taxonomy.
 
-Distribute a model or workload only for a declared reason:
+### 0.1 Hardware, roofline, and communication cost
 
-- model weights do not fit on one accelerator;
-- KV/state or workspace limits concurrency;
-- one device cannot satisfy latency;
-- replicas are needed for throughput or availability;
-- prefill and decode require different resources;
-- MoE experts exceed local capacity;
-- state locality or hardware heterogeneity favors placement.
+| Priority | Resource | Format | Exact reading target | Extract |
+|---|---|---|---|---|
+| Core | [How To Scale Your Model — How to Think About GPUs](https://jax-ml.github.io/scaling-book/gpus/) | systems book | GPU nodes, networking, collectives, LLM rooflines | topology and communication bounds |
+| Core | [How To Scale Your Model — Rooflines](https://jax-ml.github.io/scaling-book/roofline/) | systems book | full chapter | compute, HBM, capacity, and link bounds |
+| Core | [NCCL Collective Operations](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html) | official docs | all-reduce, all-gather, reduce-scatter, all-to-all, point-to-point | exact collective semantics |
+| Core | [NCCL Troubleshooting](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting.html) | official docs | GPU, network, runtime, performance, and logging branches | topology and transport diagnosis |
+| Core | [Megatron paper](../PARALLEL/MEGATRON.pdf) | Local PDF | tensor and pipeline parallel design/evaluation | original Transformer parallelism |
+| Reference | [NCCL documentation index](https://docs.nvidia.com/deeplearning/nccl/index.html) | official docs | user guide, API, environment, RAS | implementation reference |
 
-Every additional rank adds communication, synchronization, placement, and failure complexity.
+Required output:
 
-### 0.2 Distributed cost model
+- GPU/node/fabric topology diagram;
+- effective-bandwidth measurements for relevant message sizes;
+- per-layer compute and communication ledger;
+- predicted versus measured critical path.
 
-For each parallel region, record:
+### 0.2 Parallelism concepts
 
-```text
-local parameter bytes
-local activation/state bytes
-compute per rank
-messages and payload bytes
-collective rounds
-critical-path imbalance
-temporary communication buffers
-serialization and synchronization
-```
+| Topic | Core external source | Exact section | Inference code anchor |
+|---|---|---|---|
+| request replicas / data parallel | [vLLM parallelism and scaling](https://docs.vllm.ai/en/stable/serving/parallelism_scaling/) | data-parallel deployment | vLLM DP coordinator and engine cores |
+| tensor parallel | [PyTorch Tensor Parallel tutorial](https://docs.pytorch.org/tutorials/intermediate/TP_tutorial.html) | sharding plans, row/column parallel, sequence parallel | vLLM/SGLang linear layers and process groups |
+| tensor parallel | [Megatron Core Parallelism Guide](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/parallelism-guide.html) | Tensor Parallelism | Megatron tensor-parallel layers and mappings |
+| pipeline parallel | [Megatron Core Parallelism Guide](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/parallelism-guide.html) | Pipeline Parallelism | pipeline schedules and P2P communication |
+| context parallel | [Megatron Context Parallelism](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/features/context_parallel.html) | overview, benefits, communication | attention/context-parallel groups |
+| expert parallel | [Megatron Core Parallelism Guide](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/parallelism-guide.html) | Expert Parallelism | MoE dispatch, grouped GEMM, EP groups |
+| composition | [Megatron Core Parallelism Guide](https://docs.nvidia.com/megatron-core/developer-guide/latest/user-guide/parallelism-guide.html) | selection guide | `parallel_state` / group construction |
+| training-oriented visual supplement | [Hugging Face Ultra-Scale Playbook](https://huggingface.co/spaces/nanotron/ultrascale-playbook) | TP, PP, DP, sequence parallel, collectives | use for diagrams; verify inference behavior in engine code |
 
-A basic transfer estimate:
+Training tutorials are used here for the mechanics of matrix sharding and collectives. Inference
+queueing, KV ownership, and latency must be verified in an inference engine rather than inferred
+from the training path.
 
-```text
-transfer_time
-≈ software_latency
- + payload_bytes / effective_bandwidth
- + contention
- + synchronization_tail
-```
+### 0.3 Megatron source-reading path
 
-Effective bandwidth depends on message size, topology, peers, protocol, and concurrent compute.
+Repository: [NVIDIA/Megatron-LM](https://github.com/NVIDIA/Megatron-LM)
+Local clone: `../RESOURCES/repos/megatron-lm/`
 
-### 0.3 Data parallelism / replicas
+| Order | Local path | Read for |
+|---:|---|---|
+| 1 | `megatron/core/parallel_state.py` | rank groups for TP, PP, CP, DP, and EP |
+| 2 | `megatron/core/tensor_parallel/` | row/column linear layers and collective mappings |
+| 3 | `megatron/core/pipeline_parallel/` | schedules and point-to-point communication |
+| 4 | `megatron/core/distributed/` | distributed wrappers and buffers |
+| 5 | `megatron/core/transformer/moe/` | router, dispatch, expert layers |
+| 6 | `megatron/core/models/gpt/` | parallel components in a model |
+| 7 | tests matching each component | invariants and supported combinations |
 
-Each replica owns a full model and serves different requests.
+Do not read the training stack linearly. Start from `parallel_state.py`, draw the process groups, then
+follow one Transformer layer through only the active parallel axes.
 
-Strengths:
+### 0.4 Inference-engine distributed paths
 
-- high aggregate throughput;
-- failure/placement flexibility;
-- no per-layer model collective.
+#### vLLM
 
-Limits:
+External guide: [vLLM parallelism and scaling](https://docs.vllm.ai/en/stable/serving/parallelism_scaling/)
+Local clone: `../RESOURCES/repos/vllm/`
 
-- full weights per replica;
-- cache/model locality affects routing;
-- one replica still must fit and meet latency.
+Starting paths:
 
-For online inference, data parallelism usually means request-level replication rather than
-training-gradient synchronization.
+- `vllm/distributed/`;
+- `vllm/v1/executor/`;
+- `vllm/v1/worker/gpu_worker.py`;
+- `vllm/v1/engine/coordinator.py`;
+- tensor/pipeline-parallel layers under `vllm/model_executor/`;
+- distributed tests and examples.
 
-### 0.4 Tensor parallelism
+Trace:
 
-Partition large matrices across ranks. Typical layer execution uses collectives such as:
+1. process-group creation;
+2. weight partition at model load;
+3. collective call inside one decoder layer;
+4. scheduler-to-worker broadcast;
+5. sampling/output ownership;
+6. failure behavior when one rank exits.
 
-- all-reduce;
-- all-gather;
-- reduce-scatter.
+#### SGLang
 
-Benefits:
+Local clone: `../RESOURCES/repos/sglang/`
 
-- divides weight capacity and compute;
-- can reduce single-request latency when communication is fast.
+Starting paths:
 
-Costs:
+- `python/sglang/srt/distributed/`;
+- `python/sglang/srt/layers/` tensor-parallel linear layers;
+- `python/sglang/srt/managers/` for DP/PP scheduling;
+- `python/sglang/srt/model_executor/`;
+- server arguments controlling TP, DP, PP, attention DP, and EP.
 
-- per-layer synchronization;
-- smaller local GEMMs;
-- topology sensitivity;
-- one slow rank delays the group.
+#### TensorRT-LLM
 
-### 0.5 Pipeline parallelism
+External guide: [TensorRT-LLM Architecture Overview](https://nvidia.github.io/TensorRT-LLM/developer-guide/overview.html)
+Local clone: `../RESOURCES/repos/tensorrt-llm/`
 
-Partition layers into stages:
+Starting paths:
 
-```text
-stage 0 → stage 1 → ... → stage P-1
-```
+- `tensorrt_llm/_torch/distributed/`;
+- `tensorrt_llm/_torch/pyexecutor/`;
+- `tensorrt_llm/executor/`;
+- model sharding and auto-parallel transforms;
+- distributed LLM examples in the official documentation.
 
-Benefits:
+### 0.5 Collective benchmark path
 
-- divides weight capacity;
-- uses point-to-point activation transfer.
+| Priority | Repository | Exact use | Status |
+|---|---|---|---|
+| Core | [NVIDIA/nccl-tests](https://github.com/NVIDIA/nccl-tests) | all-reduce, all-gather, reduce-scatter, all-to-all, send/recv across message sizes | Local clone |
+| Branch | [PyTorch distributed benchmarks](https://github.com/pytorch/pytorch/tree/main/benchmarks/distributed) | framework-level collective overhead | Link |
+| Branch | [GPU Mode Lecture 17](https://github.com/gpu-mode/lectures/tree/main/lecture_017) | NCCL examples and explanatory slides | Local clone |
 
-Costs:
+Required benchmark matrix:
 
-- pipeline bubbles;
-- stage imbalance;
-- activation transfer;
-- request/microbatch scheduling complexity;
-- state ownership across stages.
+- intra-GPU-package or closest available domain;
+- intra-node peer links;
+- cross-socket/PCIe path when applicable;
+- cross-node fabric;
+- small decode-like messages;
+- large prefill or weight/state-transfer messages;
+- isolated and compute-overlapped cases.
 
-### 0.6 Context and sequence parallelism
+Record bus bandwidth and algorithm bandwidth according to the tool’s definitions.
 
-Partition sequence/token work where attention or long-context memory exceeds one device. Depending
-on the method, ranks exchange:
+### 0.6 Prefill/decode disaggregation
 
-- Q/K/V blocks;
-- partial attention outputs/statistics;
-- activations;
-- KV/state.
+| Priority | Resource | Format | Read for |
+|---|---|---|---|
+| Core | [DistServe](../SERVING/DISTSERVE.pdf) | Local PDF | goodput and independent prefill/decode parallelism |
+| Core | [Splitwise](../SERVING/SPLITWISE.pdf) | Local PDF | phase-specific provisioning and placement |
+| Core | [Mooncake](../CACHE/MOONCAKE.pdf) | Local PDF | KV-centric disaggregated architecture |
+| Core | [Dynamo Disaggregated Serving](https://docs.nvidia.com/dynamo/latest/design-docs/disaggregated-serving) | official design doc | router orchestration and KV transfer |
+| Core | [llm-d P/D guide](https://github.com/llm-d/llm-d/tree/main/guides/pd-disaggregation) | deployment guide | Kubernetes objects and end-to-end configuration |
+| Branch | [Dynamo user guide](https://docs.nvidia.com/dynamo/user-guides/disaggregated-serving) | operational guide | RDMA requirements and validation |
 
-The communication pattern differs between prefill and decode.
+Local source paths:
 
-### 0.7 Expert parallelism
+- `../RESOURCES/repos/distserve/`;
+- `../RESOURCES/repos/dynamo/examples/backends/` and `deploy/`;
+- `../RESOURCES/repos/llm-d/guides/pd-disaggregation/`;
+- `../RESOURCES/repos/mooncake/`.
 
-Partition MoE experts across ranks. Tokens move to selected experts and outputs return:
+Required transfer trace:
 
-```text
-route
-→ dispatch / all-to-all
-→ expert compute
-→ combine / all-to-all
-```
+- KV layout and bytes;
+- source/destination ownership;
+- metadata exchange;
+- transport and topology;
+- overlap with compute;
+- failure/cancellation cleanup;
+- TTFT/TPOT break-even against colocated serving.
 
-The rest of this document develops this path in detail.
+### 0.7 Dense distributed exit gate
 
-### 0.8 Collectives
+Before entering the MoE sections, produce:
 
-Know the semantics and likely use of:
-
-| Primitive | Typical use |
-|---|---|
-| all-reduce | combine partial outputs |
-| all-gather | assemble partitioned activations/weights |
-| reduce-scatter | reduce and retain partitions |
-| all-to-all | expert/token redistribution |
-| broadcast | distribute shared data |
-| point-to-point | pipeline/state transfer |
-
-Benchmark latency and bandwidth across realistic message sizes. Large-message peak bandwidth does
-not predict decode-time small-message latency.
-
-### 0.9 Topology
-
-Distinguish:
-
-```text
-within accelerator package
-→ within node over NVLink/NVSwitch/xGMI
-→ cross-socket PCIe
-→ cross-node InfiniBand/RoCE/Ethernet
-→ storage/state paths
-```
-
-Placement should keep frequent, latency-sensitive communication on stronger links when capacity and
-failure constraints permit.
-
-### 0.10 Parallelism composition
-
-Real deployments combine axes:
-
-```text
-replicas × pipeline × tensor/context × expert parallelism
-```
-
-Verify that the product of degrees matches the physical rank count and that each axis has a clear
-ownership/communication boundary.
-
-### 0.11 Disaggregation
-
-Possible separations:
-
-- prefill workers versus decode workers;
-- compute versus KV/state storage;
-- encoder versus decoder;
-- draft versus target model;
-- router/control plane versus model workers.
-
-Disaggregation is beneficial only when specialization/locality gains exceed transfer, queueing,
-serialization, and failure-management cost.
-
-### 0.12 Required distributed evidence
-
-- per-rank memory ledger;
-- parallelism calculator;
-- topology diagram;
-- collective/message-size model;
-- measured-versus-predicted communication;
-- load/straggler distribution;
-- prefill/decode comparison;
-- break-even boundary against a colocated or smaller-parallelism baseline.
+- [ ] a per-rank weight, KV, activation, workspace, and communication-buffer ledger;
+- [ ] a parallelism-group diagram whose degree product matches the rank count;
+- [ ] one decoder-layer collective trace with payload sizes;
+- [ ] an `nccl-tests` or equivalent message-size curve on the target topology;
+- [ ] a prefill-versus-decode communication comparison;
+- [ ] a measured straggler or imbalance distribution;
+- [ ] a smaller-parallelism or colocated baseline;
+- [ ] a pinned engine commit and exact source paths for every claimed behavior.
 
 ---
 

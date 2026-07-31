@@ -1,642 +1,361 @@
-# Transformer and Hugging Face Foundations
+# Transformer and Hugging Face — Curated Reading Map
 
-> **Role:** connect next-token modeling to a working decoder-only Transformer
->
-> **Prerequisite:** [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md) or equivalent knowledge
->
-> **Outcome:** understand both the architecture and the Hugging Face model interface used by real systems
-
-[Roadmap index](README.md) ·
-[Overview](00-roadmap.md) ·
-[AI/ML foundations](01-ai-ml-foundations.md) ·
-[Modern architecture](03-modern-llm-architecture.md) ·
-[Competency gates](COMPETENCY-GATES.md)
+> **Role:** bridge from basic deep learning to decoder-only LLM execution
+> **Target:** understand a Transformer from tokens through generation, then locate the same path in Hugging Face Transformers
+> **Format:** external English visual guides, executable tutorials, official documentation, papers, and repository source paths
+> **Not included:** an original Transformer tutorial or a training schedule
 
 ---
 
-## Transformer Execution Map
+## How to Use This Map
 
-```mermaid
-flowchart LR
-    T["Text"] --> Tok["Tokenizer"]
-    Tok --> IDs["Token IDs"]
-    IDs --> Emb["Token embeddings"]
-    Emb --> Blocks["Decoder blocks"]
-    Blocks --> Norm["Final norm"]
-    Norm --> Head["LM head"]
-    Head --> Logits["Logits"]
-    Logits --> Sample["Sampling"]
-    Sample --> Next["Next token"]
-    Next --> IDs
-```
+Use the resources in four passes:
 
-### Document guide
+1. **visual pass** — obtain the end-to-end picture;
+2. **executable pass** — connect each block to code and tensor shapes;
+3. **decoder-only pass** — move from the original encoder–decoder model to GPT-style LLMs;
+4. **framework pass** — trace loading, forward, cache, generation, and sampling in Hugging Face.
 
-| Section | Focus |
-|---|---|
-| 1 | tokens, language modeling, and embeddings |
-| 2 | attention from Q/K/V to multi-head execution |
-| 3 | the complete decoder block |
-| 4 | training, prefill, decode, generation, and KV cache |
-| 5 | Hugging Face Transformers |
-| 6 | minimal implementation and exit gate |
+Resource labels:
+
+- **Core** — required;
+- **Branch** — use for additional explanation or a weak prerequisite;
+- **Reference** — consult while reading code;
+- **Local PDF** — already stored in this repository;
+- **Link** — keep remote unless active source work requires a clone.
 
 ---
 
-## 1. Tokens and Language Modeling
+## Coverage Checklist
 
-### 1.1 Text is not the model input
+### Text and objective
 
-The model consumes integer token IDs:
+- [ ] bytes, Unicode, vocabulary, token IDs, special tokens, BPE, and decoding;
+- [ ] embedding table, tied weights, logits, categorical distribution, and next-token loss;
+- [ ] context length, padding, attention mask, and causal mask.
 
-```text
-text
-→ tokenizer
-→ token IDs
-→ model
-→ next-token logits
-```
+### Transformer block
 
-Token boundaries need not align with words. Token count—not character count—primarily controls:
+- [ ] Q/K/V projections and their shapes;
+- [ ] scaled dot-product attention and multi-head attention;
+- [ ] positional encoding and RoPE;
+- [ ] residual stream, LayerNorm/RMSNorm, FFN, and SwiGLU;
+- [ ] encoder–decoder versus decoder-only structure;
+- [ ] MHA, MQA, and GQA at the shape level.
 
-- prefill compute;
-- KV/state footprint;
-- context-window occupancy;
-- serving cost and billing.
+### Inference
 
-### 1.2 Tokenizer components
+- [ ] training forward pass versus prefill versus decode;
+- [ ] autoregressive generation and stopping;
+- [ ] greedy, temperature, top-k, top-p, and beam search;
+- [ ] KV-cache contents, dimensions, update rule, and memory growth;
+- [ ] batching, padding side, position IDs, and attention masks.
 
-Know the role of:
+### Hugging Face
 
-- vocabulary;
-- token-to-ID mapping;
-- BPE/SentencePiece-style segmentation;
-- byte fallback;
-- special tokens;
-- BOS/EOS/PAD tokens;
-- chat templates;
-- attention masks.
-
-Two prompts that look identical can tokenize differently because of normalization, special tokens,
-or chat templates. Prefix caching must key on the effective token sequence and model context.
-
-### 1.3 Next-token objective
-
-For sequence `x_1, ..., x_T`:
-
-```text
-P(x_1, ..., x_T) = Π_t P(x_t | x_<t)
-```
-
-Training examples use a shifted target:
-
-```text
-input : x_1 x_2 x_3 ... x_(T-1)
-target: x_2 x_3 x_4 ... x_T
-```
-
-The model outputs one vocabulary-logit vector per selected position.
-
-### 1.4 Embeddings
-
-For vocabulary size `V` and hidden dimension `d`:
-
-```text
-embedding table: [V, d]
-token IDs:       [B, T]
-embeddings:      [B, T, d]
-```
-
-An embedding lookup selects rows; it is not the same execution shape as multiplying a one-hot
-matrix, even though the mathematics is equivalent.
-
-Inspect whether:
-
-- input embedding and output head share weights;
-- vocabulary is tensor-parallel;
-- only final-position logits are computed during decode.
+- [ ] tokenizer, config, model class, checkpoint, and generation config;
+- [ ] `AutoTokenizer`, `AutoConfig`, and `AutoModelForCausalLM`;
+- [ ] model `forward()`, `past_key_values`, `Cache`, and `generate()`;
+- [ ] exact architecture-specific source path under `src/transformers/models/`;
+- [ ] generation path under `src/transformers/generation/`.
 
 ---
 
-## 2. Attention
+## 1. Visual First Pass
 
-### 2.1 Why attention exists
+| Priority | Resource | Format | Read / view | Extract |
+|---|---|---|---|---|
+| Core | [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) | visual blog | full article | encoder–decoder dataflow, attention, heads, residuals, positions |
+| Core | [The Illustrated GPT-2](https://jalammar.github.io/illustrated-gpt2/) | visual blog | full article | decoder-only generation and causal attention |
+| Core | [3Blue1Brown — Attention in Transformers](https://www.3blue1brown.com/lessons/attention) | visual lesson | attention lesson and the surrounding Transformer lessons | geometric and token-to-token intuition |
+| Branch | [Lilian Weng — Attention? Attention!](https://lilianweng.github.io/posts/2018-06-24-attention/) | technical blog | self-attention and multi-head sections | alternative notation and broader attention context |
+| Reference | [Attention Is All You Need](../FOUNDATION/ATTENTION.pdf) | Local PDF | abstract, Sections 3–5, Figure 1, Tables 1–3 | canonical definitions and complexity claims |
 
-Each token needs a context-dependent representation. Attention lets a query position retrieve
-information from allowed key/value positions.
-
-For hidden states `X`:
-
-```text
-Q = XW_Q
-K = XW_K
-V = XW_V
-```
-
-Then:
-
-```text
-scores  = QKᵀ / sqrt(d_head)
-weights = softmax(scores + mask)
-output  = weights V
-```
-
-### 2.2 Shapes
-
-For batch `B`, sequence length `T`, model width `d`, head count `H`, and head width `Dh`:
-
-```text
-X : [B, T, d]
-Q : [B, H, T, Dh]
-K : [B, Hkv, T, Dh]
-V : [B, Hkv, T, Dh]
-```
-
-With conventional multi-head attention, `Hkv = H`. GQA and MQA reduce `Hkv`.
-
-### 2.3 A two-token, one-head example
-
-Given:
-
-```text
-Q = [[1, 0],
-     [0, 1]]
-
-K = [[1, 0],
-     [1, 1]]
-
-V = [[2, 0],
-     [0, 4]]
-```
-
-For the first causal position, only token 1 is visible, so its attention output is `V_1`.
-For the second position, compute its dot products with both keys, scale, softmax, and take the
-weighted sum of both value vectors.
-
-Do this once by hand. It establishes what a row of the attention matrix means and how causal masking
-changes the probability distribution.
-
-### 2.4 Causal masking
-
-A decoder token at position `t` may attend only to positions `≤ t`:
-
-```text
-allowed:  past and current positions
-blocked:  future positions
-```
-
-Masking usually adds a large negative value to forbidden logits before softmax.
-
-Padding masks and causal masks serve different purposes:
-
-- padding mask hides non-content padding;
-- causal mask prevents future information leakage.
-
-### 2.5 Multi-head attention
-
-Multiple heads provide separate projection subspaces:
-
-```text
-head_h = Attention(Q_h, K_h, V_h)
-output = Concat(head_1, ..., head_H) W_O
-```
-
-Record:
-
-- query-head count;
-- KV-head count;
-- head width;
-- projection layout;
-- head-to-KV-group mapping;
-- output projection.
-
-### 2.6 Positional information
-
-Attention alone is permutation-equivariant. Position mechanisms include:
-
-- absolute position embeddings;
-- sinusoidal encoding;
-- RoPE;
-- ALiBi;
-- relative position bias;
-- long-context RoPE scaling.
-
-Modern decoder-only LLMs commonly use RoPE. Understand that RoPE rotates query/key pairs by a
-position-dependent phase; values are not normally rotated.
-
-### 2.7 Attention cost
-
-For prefill, score computation scales approximately with:
-
-```text
-O(B × H × T² × Dh)
-```
-
-For one-token decode with existing context length `Tk`:
-
-```text
-O(B × H × Tk × Dh)
-```
-
-The implementation must also read K/V state. FLOPs alone do not describe decode cost.
+Stop the visual pass when a decoder-only token path can be drawn from token ID to next-token logits without implementation detail.
 
 ---
 
-## 3. Decoder Block
+## 2. Tokenization and Input Construction
 
-### 3.1 Pre-norm block
+### 2.1 Concept and implementation
 
-Common abstraction:
+| Priority | Resource | Format | Exact reading target | Extract |
+|---|---|---|---|---|
+| Core | [Hugging Face LLM Course — Tokenizers](https://huggingface.co/learn/llm-course/en/chapter6/1) | official course | Chapter 6 sections 1–8 | normalizer, pre-tokenizer, model, post-processor, training |
+| Core | [Andrej Karpathy — minbpe](https://github.com/karpathy/minbpe) | lecture + compact repo | `lecture.md`, `minbpe/base.py`, `basic.py`, `regex.py`, `gpt4.py` | BPE training, encoding, regex splitting, special tokens |
+| Core | [LLMs from Scratch — Working with Text Data](https://github.com/rasbt/LLMs-from-scratch/tree/main/ch02) | notebook + code | `ch02.ipynb`, `dataloader.ipynb` | tokenization, sliding windows, input/target shift |
+| Reference | [Hugging Face Tokenizers documentation](https://huggingface.co/docs/tokenizers/main/en/index) | official docs | quick tour and components | production tokenizer API boundaries |
 
-```text
-h = x + Attention(Norm(x))
-y = h + FFN(Norm(h))
-```
+### 2.2 Repository reading paths
 
-Components:
+`karpathy/minbpe`:
 
-- normalization;
-- attention projections and output projection;
-- residual addition;
-- feed-forward network;
-- second residual addition.
+1. `minbpe/base.py` — shared vocabulary, merge and render utilities;
+2. `minbpe/basic.py` — minimal BPE algorithm;
+3. `minbpe/regex.py` — GPT-style splitting and special tokens;
+4. `minbpe/gpt4.py` — compatibility with GPT-4 tokenization;
+5. `tests/test_tokenizer.py` — expected behavior.
 
-### 3.2 RMSNorm
+`huggingface/tokenizers`:
 
-RMSNorm scales by root-mean-square magnitude:
-
-```text
-rms(x) = sqrt(mean(x²) + ε)
-y = scale ⊙ x / rms(x)
-```
-
-Unlike LayerNorm, RMSNorm does not subtract the feature mean.
-
-### 3.3 Gated FFN / SwiGLU
-
-Typical form:
-
-```text
-gate = SiLU(xW_gate)
-up   = xW_up
-y    = (gate ⊙ up) W_down
-```
-
-This introduces three major matrices rather than the two in a basic MLP.
-
-### 3.4 Residual stream
-
-The residual stream keeps hidden width constant across blocks. The attention and FFN outputs must
-return to model width before residual addition.
-
-### 3.5 Final normalization and LM head
-
-After the decoder stack:
-
-```text
-hidden states
-→ final norm
-→ LM head
-→ vocabulary logits
-```
-
-The LM head can become significant for very large vocabularies or very small models.
-
-### 3.6 Parameter ledger
-
-For every block, count:
-
-```text
-Q projection
-K projection
-V projection
-attention output projection
-FFN gate/up/down matrices
-normalization scales
-biases if present
-```
-
-Then add:
-
-- embeddings;
-- final normalization;
-- LM head;
-- routed/shared experts if MoE.
-
----
-
-## 4. Training, Prefill, Decode, and Generation
-
-### 4.1 Training
-
-Training commonly processes many tokens in parallel with a causal mask:
-
-```text
-full token batch
-→ logits for many positions
-→ shifted cross entropy
-→ backward
-→ optimizer update
-```
-
-Training retains activations for backward and usually has no persistent request KV cache.
-
-### 4.2 Prefill
-
-Prefill processes the prompt:
-
-```text
-prompt tokens
-→ parallel decoder execution
-→ KV state for every layer and prompt position
-→ logits for next-token selection
-```
-
-Prefill often forms large GEMMs and attention tiles.
-
-### 4.3 Decode
-
-Decode processes newly generated tokens iteratively:
-
-```text
-one new token per active sequence
-→ new Q/K/V
-→ attend to retained state
-→ append new K/V
-→ sample
-→ repeat
-```
-
-Decode has small query length, growing state, dynamic batches, and a serial token dependency.
-
-### 4.4 KV cache correctness
-
-Without caching, the model recomputes K/V for all previous tokens at every step. Because past hidden
-states and their K/V projections are unchanged in an ordinary causal decoder, they can be retained.
-
-Per-request capacity:
-
-```text
-KV bytes
-≈ 2 × layers × KV heads × head dimension
-  × retained tokens × bytes per element
-```
-
-Caching changes execution, not model semantics. Cached and uncached logits should match within the
-declared numerical tolerance.
-
-### 4.5 Autoregressive generation
-
-```text
-encode prompt
-→ prefill
-→ select next token
-→ append token
-→ decode with cache
-→ stop on EOS / length / stopping rule
-```
-
-### 4.6 Sampling
-
-Know:
-
-- greedy decoding;
-- temperature;
-- top-k;
-- top-p/nucleus;
-- min-p;
-- repetition penalties;
-- stop tokens and stop strings.
-
-Sampling configuration changes output quality, output length, reproducibility, and speculative
-acceptance. It belongs in the workload contract.
-
----
-
-## 5. Hugging Face Transformers
-
-### 5.1 Repository role
-
-[huggingface/transformers](https://github.com/huggingface/transformers) provides:
-
-- tokenizer implementations;
-- model configurations;
-- model definitions;
-- checkpoint loading;
-- generation utilities;
-- cache abstractions;
-- quantization/backend integration;
-- training and inference interfaces.
-
-It is a model-definition framework, not an optimized online serving engine.
-
-### 5.2 Core loading path
-
-```python
-from transformers import AutoTokenizer, AutoModelForCausalLM
-
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id)
-```
-
-Understand what each object loads:
-
-| Object | Important contents |
-|---|---|
-| tokenizer | vocabulary, merges/model, special tokens, chat template |
-| config | layer count, hidden size, heads, KV heads, positional settings, dtype hints |
-| model | module graph and parameters |
-| generation config | sampling, stopping, and decoding defaults |
-
-### 5.3 Tokenizer inspection
-
-Be able to:
-
-- encode/decode text;
-- inspect special token IDs;
-- apply the chat template;
-- compare raw text length with token length;
-- batch and pad sequences;
-- inspect attention masks;
-- show why two prompt templates cannot share a token-prefix cache.
-
-### 5.4 Configuration inspection
-
-Extract at minimum:
-
-```text
-model_type
-vocab_size
-hidden_size
-intermediate_size
-num_hidden_layers
-num_attention_heads
-num_key_value_heads
-head_dim
-max_position_embeddings
-rope settings
-attention pattern
-MoE fields
-dtype / quantization fields
-```
-
-### 5.5 Model source path
-
-Trace:
-
-```text
-AutoModel class resolution
-→ model-family module
-→ top-level causal LM
-→ decoder model
-→ decoder layer
-→ attention module
-→ MLP/MoE module
-→ cache update
-```
-
-Do not treat `model.generate()` as a black box.
-
-### 5.6 Forward outputs
-
-Inspect:
-
-- logits;
-- hidden states;
-- attention outputs when enabled;
-- cache object / past key values;
-- loss when labels are supplied.
-
-Know which outputs add large memory or synchronization overhead.
-
-### 5.7 Generation path
-
-Trace:
-
-```text
-generate()
-→ generation configuration
-→ input preparation
-→ prefill forward
-→ logits processors/warpers
-→ token selection
-→ cache update
-→ stopping criteria
-→ iterative decode
-```
-
-### 5.8 Cache interfaces
-
-Understand:
-
-- legacy tuple-style past key values;
-- dynamic/static cache concepts;
-- sequence length and retained position;
-- cache reordering for beams;
-- device/dtype/layout;
-- why production engines often replace the framework cache manager.
-
-### 5.9 Common mistakes
-
-- loading a checkpoint without matching tokenizer/chat template;
-- relying on model-card architecture descriptions instead of config/source;
-- comparing `generate()` latency without warmup or synchronization;
-- enabling returned attention matrices and then measuring memory;
-- assuming `device_map="auto"` is an optimized serving placement;
-- treating quantized loading as proof of an optimized low-bit kernel;
-- comparing cached and uncached logits with inconsistent positions or masks.
-
----
-
-## 6. Required Builds
-
-### Build A — Attention by hand
-
-- calculate a two-token, one-head causal attention output;
-- verify it against a small tensor implementation;
-- print every intermediate shape.
-
-### Build B — Minimal decoder block
-
-Implement:
-
-```text
-RMSNorm
-→ causal self-attention
-→ residual
-→ RMSNorm
-→ SwiGLU
-→ residual
-```
+1. documentation quick tour;
+2. `tokenizers/src/tokenizer/` for the pipeline abstraction;
+3. `tokenizers/src/models/` for BPE/WordPiece/Unigram implementations;
+4. language bindings only after the Rust core is understood.
 
 Required evidence:
 
-- shape assertions;
-- causal-mask test;
-- parameter/FLOP ledger;
-- deterministic reference output.
+- tokenize one string containing Unicode, whitespace, and a special token;
+- record token strings, token IDs, offsets, attention mask, and decoded output;
+- explain why the model consumes IDs rather than text.
 
-### Build C — Minimal autoregressive model
+---
 
-Add:
+## 3. Original Transformer: Executable Reading
 
-- token embedding;
-- positional mechanism;
-- multiple decoder blocks;
-- final norm and LM head;
-- shifted cross entropy;
-- greedy and sampled generation.
+### 3.1 Primary implementation
 
-### Build D — KV cache
+[The Annotated Transformer](https://nlp.seas.harvard.edu/annotated-transformer/) is the executable companion to the original paper.
 
-- implement generation with and without caching;
-- verify matching logits;
-- measure state bytes per token;
-- separate prefill and decode timing.
+Follow this order inside the article:
 
-### Build E — Hugging Face model inspection
+| Order | Section | Required extraction |
+|---:|---|---|
+| 1 | Model Architecture | encoder–decoder boundary |
+| 2 | Encoder and Decoder Stacks | residual and normalization placement |
+| 3 | Attention | Q/K/V shapes, scale, mask, softmax |
+| 4 | Applications of Attention | self-attention, cross-attention, causal attention |
+| 5 | Position-wise Feed-Forward Networks | per-token dense path |
+| 6 | Embeddings and Softmax | input/output projections and weight sharing |
+| 7 | Positional Encoding | position injection |
+| 8 | Full Model | module composition |
+| 9 | Inference | autoregressive loop and mask growth |
 
-For one small open model:
+Repository: [harvardnlp/annotated-transformer](https://github.com/harvardnlp/annotated-transformer)
 
-1. tokenize a raw prompt and a chat-template prompt;
-2. extract the architecture fields from config;
-3. locate attention, MLP, normalization, RoPE, and cache-update source;
-4. run forward and generation;
-5. inspect logits and cache shapes;
-6. compare cached and uncached next-token logits;
-7. map framework modules to the corresponding architecture ledger.
+Source path:
+
+1. `the_annotated_transformer.py`;
+2. search classes/functions in article order: `MultiHeadedAttention`, `attention`, `PositionalEncoding`, `PositionwiseFeedForward`, `make_model`;
+3. inspect `subsequent_mask` and `greedy_decode`;
+4. defer the translation data pipeline unless encoder–decoder training is a research dependency.
+
+### 3.2 Alternative executable source
+
+| Priority | Resource | Format | Exact target |
+|---|---|---|---|
+| Branch | [D2L — Attention Mechanisms and Transformers](https://d2l.ai/chapter_attention-mechanisms-and-transformers/index.html) | interactive book | 11.1–11.7 |
+| Branch | [PyTorch — Language Modeling with `nn.Transformer`](https://docs.pytorch.org/tutorials/beginner/transformer_tutorial.html) | official tutorial | model definition, masks, training loop |
+| Reference | [pytorch/tutorials](https://github.com/pytorch/tutorials) | source repo | locate the Transformer tutorial source and rendered notebook |
+
+Use D2L when the Annotated Transformer moves too quickly through attention scoring or tensor shapes.
+
+---
+
+## 4. Decoder-Only GPT from the Bottom Up
+
+### 4.1 Primary book-and-code spine
+
+Use [rasbt/LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch) for the decoder-only transition.
+
+| Order | Repository path | Read / run | Exit condition |
+|---:|---|---|---|
+| 1 | `ch02/` | `ch02.ipynb`, `dataloader.ipynb` | input/target token shift is clear |
+| 2 | `ch03/` | `ch03.ipynb`, `multihead-attention.ipynb` | causal multi-head attention shapes are recorded |
+| 3 | `ch04/` | `ch04.ipynb`, `gpt.py` | a complete GPT forward path can be traced |
+| 4 | `ch05/` | `ch05.ipynb`, `gpt_generate.py` | training, checkpoint loading, and generation are separated |
+| Branch | `appendix-A/` | PyTorch introduction notebooks | use only for missing framework prerequisites |
+
+Do not proceed into classification or instruction fine-tuning unless Stage 3 training/post-training is in scope.
+
+### 4.2 Compact codebases for comparison
+
+| Priority | Repository | Exact path | What to compare |
+|---|---|---|---|
+| Core | [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | `model.py` | `CausalSelfAttention`, `MLP`, `Block`, `GPT`, generation |
+| Branch | [karpathy/llm.c](https://github.com/karpathy/llm.c) | `train_gpt2.py`, then C/CUDA source | framework implementation versus explicit kernels/runtime |
+| Branch | [pytorch-labs/gpt-fast](https://github.com/pytorch-labs/gpt-fast) | `model.py`, `generate.py`, `tp.py` | inference-oriented PyTorch, cache, compile, and TP |
+| Branch | [stanford-cs336/assignment1-basics](https://github.com/stanford-cs336/assignment1-basics) | assignment PDF and test adapters | implementation requirements and correctness tests |
+
+The compact-code comparison should produce one table of:
+
+- normalization placement;
+- attention projection layout;
+- positional method;
+- MLP activation/gating;
+- tied embeddings;
+- cache representation;
+- generation loop.
+
+---
+
+## 5. Modern Decoder Block Branches
+
+This section points forward to [03-modern-llm-architecture.md](03-modern-llm-architecture.md). Read only enough to recognize the components.
+
+| Topic | Core external explanation | Primary paper / local source | Code anchor |
+|---|---|---|---|
+| RoPE | [EleutherAI — Rotary Embeddings: A Relative Revolution](https://blog.eleuther.ai/rotary-embeddings/) | [RoFormer](../ARCHITECTURE/ROPE.pdf) | Hugging Face Llama/Qwen rotary classes |
+| RMSNorm | [Sebastian Raschka — LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture/) | [RMSNorm](../ARCHITECTURE/RMSNORM.pdf) | `LlamaRMSNorm` |
+| SwiGLU / GLU variants | [Noam Shazeer — GLU Variants Improve Transformer](../ARCHITECTURE/GLU-VARIANTS.pdf) | same Local PDF | model MLP class |
+| MQA | [Fast Transformer Decoding](../ARCHITECTURE/MQA.pdf) | Local PDF | KV-head count in config/model |
+| GQA | [GQA](../ARCHITECTURE/GQA.pdf) | Local PDF | repeat/group KV implementation |
+| Decoder families | [Sebastian Raschka — LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture/) | Llama, Mistral, Qwen, DeepSeek local PDFs | corresponding HF model directories |
+
+Do not treat architecture diagrams as implementation truth. Confirm every shape and configuration field in source.
+
+---
+
+## 6. Hugging Face Practical Course
+
+### 6.1 Official course path
+
+| Priority | Resource | Exact reading target | Extract |
+|---|---|---|---|
+| Core | [Hugging Face LLM Course — Chapter 1](https://huggingface.co/learn/llm-course/chapter1/1) | Transformer model families and pipeline overview | library vocabulary |
+| Core | [Hugging Face LLM Course — Chapter 2](https://huggingface.co/learn/llm-course/chapter2/1) | pipeline internals, models, tokenizers, batching | end-to-end framework path |
+| Core | [Hugging Face LLM Course — Chapter 6](https://huggingface.co/learn/llm-course/en/chapter6/1) | tokenizer internals | input construction |
+| Branch | [Hugging Face LLM Course — Chapter 10](https://huggingface.co/learn/llm-course/chapter10/1) | build and share model demos | deployment-facing API awareness |
+
+Course repository: [huggingface/course](https://github.com/huggingface/course)
+
+- English content lives under `chapters/en/`.
+- Use `_toctree.yml` to map rendered chapters to source files.
+- Do not inspect translation directories.
+
+### 6.2 Official generation and cache documentation
+
+| Priority | Resource | Read / inspect | Extract |
+|---|---|---|---|
+| Core | [Generation strategies](https://huggingface.co/docs/transformers/generation_strategies) | decoding methods and generation configuration | greedy, sampling, beam, speculative/assisted branches |
+| Core | [Caching](https://huggingface.co/docs/transformers/cache_explanation) | cache data structure and update | layer/head/sequence dimensions |
+| Core | [KV cache strategies](https://huggingface.co/docs/transformers/kv_cache) | dynamic, static, offloaded, quantized cache options | memory/compile trade-offs |
+| Core | [Optimizing LLMs for speed and memory](https://huggingface.co/docs/transformers/llm_tutorial_optimization) | autoregressive loop and KV-cache example | framework baseline before serving engines |
+| Reference | [Generation API](https://huggingface.co/docs/transformers/main_classes/text_generation) | `GenerationConfig` and `generate()` arguments | exact public API |
+| Reference | [Generation internals](https://huggingface.co/docs/transformers/internal/generation_utils) | cache and logits processor classes | source navigation |
+
+---
+
+## 7. Hugging Face Source-Reading Path
+
+Repository: [huggingface/transformers](https://github.com/huggingface/transformers)
+
+Follow a single small decoder model end to end. Qwen2, Llama, or Mistral is sufficient.
+
+### 7.1 Configuration and loading
+
+| Order | Source path | Question |
+|---:|---|---|
+| 1 | `src/transformers/models/auto/configuration_auto.py` | how does a model type select a config class? |
+| 2 | `src/transformers/models/auto/modeling_auto.py` | how does `AutoModelForCausalLM` select a model class? |
+| 3 | `src/transformers/modeling_utils.py` | how are modules instantiated and checkpoints loaded? |
+| 4 | target model `configuration_*.py` | which fields determine layers, heads, KV heads, positions, and dtypes? |
+
+### 7.2 Model forward
+
+For Llama:
+
+1. `src/transformers/models/llama/configuration_llama.py`;
+2. `src/transformers/models/llama/modeling_llama.py`;
+3. locate `LlamaRMSNorm`, rotary embedding, attention, MLP, decoder layer, base model, and causal-LM wrapper;
+4. trace `input_ids` → embeddings → layers → norm → LM head → logits;
+5. record where masks, position IDs, and cache positions enter.
+
+Repeat only the architecture-specific differences for:
+
+- `src/transformers/models/mistral/`;
+- `src/transformers/models/qwen2/`;
+- `src/transformers/models/deepseek_v3/`, if supported in the current checkout.
+
+### 7.3 Cache and generation
+
+| Source path | Read for |
+|---|---|
+| `src/transformers/cache_utils.py` | cache abstractions, dynamic/static/offloaded variants |
+| `src/transformers/generation/utils.py` | main generation loop and model-input preparation |
+| `src/transformers/generation/configuration_utils.py` | generation configuration |
+| `src/transformers/generation/logits_process.py` | temperature, top-k, top-p, penalties, constraints |
+| `src/transformers/generation/stopping_criteria.py` | termination |
+| architecture model file | `prepare_inputs_for_generation` and cache-position behavior |
+
+The framework pass is complete when one call to `generate()` can be mapped to concrete source files without relying on the high-level pipeline abstraction.
+
+---
+
+## 8. Required Evidence
+
+Produce these learning artifacts:
+
+1. a tokenization record with tokens, IDs, offsets, special tokens, and round-trip decode;
+2. a shape ledger for one decoder layer:
+   - hidden state;
+   - Q/K/V;
+   - attention scores;
+   - attention output;
+   - MLP intermediate;
+   - logits;
+3. a parameter ledger for embeddings, attention projections, MLP, normalization, and LM head;
+4. a minimal causal-attention implementation cross-checked against PyTorch;
+5. a minimal decoder block or a completed `LLMs-from-scratch` Chapter 4 path;
+6. a cached-versus-uncached generation check with matching tokens;
+7. a Hugging Face source trace from `AutoModelForCausalLM` through model forward and `generate()`.
+
+For the cache check, record:
+
+- model and revision;
+- tokenizer;
+- dtype and device;
+- prompt tokens;
+- deterministic decoding configuration;
+- cache tensor shapes per layer;
+- the point at which cached and uncached paths are compared.
+
+---
+
+## 9. Repository Index
+
+| Repository | Role | Starting path | Status |
+|---|---|---|---|
+| [harvardnlp/annotated-transformer](https://github.com/harvardnlp/annotated-transformer) | executable original Transformer | article and `the_annotated_transformer.py` | Link |
+| [rasbt/LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch) | decoder-only implementation spine | `ch02/` → `ch05/` | Link |
+| [karpathy/minbpe](https://github.com/karpathy/minbpe) | compact tokenizer | `lecture.md`, `minbpe/` | Link |
+| [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | compact GPT | `model.py` | Link |
+| [huggingface/course](https://github.com/huggingface/course) | official course source | `chapters/en/` | Link |
+| [huggingface/transformers](https://github.com/huggingface/transformers) | production framework | `src/transformers/models/`, `generation/`, `cache_utils.py` | Link |
+| [huggingface/tokenizers](https://github.com/huggingface/tokenizers) | production tokenizer internals | `tokenizers/src/` | Link |
+| [stanford-cs336/assignment1-basics](https://github.com/stanford-cs336/assignment1-basics) | correctness-oriented implementation task | assignment PDF and tests | Link |
+| [pytorch-labs/gpt-fast](https://github.com/pytorch-labs/gpt-fast) | inference-oriented PyTorch GPT | `model.py`, `generate.py`, `tp.py` | Link |
+
+Clone only a repository that will be executed, modified, or repeatedly read offline.
+
+---
+
+## 10. What to Defer
+
+Defer until later layers:
+
+- full pretraining and post-training pipelines;
+- every Hugging Face model family;
+- multimodal processors and architectures;
+- distributed generation;
+- paged KV allocation and continuous batching;
+- FlashAttention kernel implementation;
+- quantization kernels;
+- speculative decoding systems.
 
 ---
 
 ## Exit Gate
 
-You can:
+Continue to [03-modern-llm-architecture.md](03-modern-llm-architecture.md) when:
 
-1. explain tokenization and next-token likelihood;
-2. derive Q/K/V, attention-score, output, and KV-cache shapes;
-3. compute a small causal-attention example manually;
-4. reconstruct a pre-norm decoder block;
-5. distinguish training, prefill, and decode;
-6. implement autoregressive generation and a correct KV cache;
-7. explain sampling and stopping semantics;
-8. load and inspect a Hugging Face causal LM without treating `generate()` as opaque;
-9. locate model-family and cache code in `transformers`;
-10. calculate weight, activation, FLOP, and KV/state costs from a configuration.
+- [ ] a decoder-only Transformer can be traced from tokens to logits;
+- [ ] every major tensor in attention has a recorded shape;
+- [ ] causal masking, positional information, residuals, normalization, and MLP gating are located in code;
+- [ ] training, prefill, and decode are distinguished;
+- [ ] cached and uncached deterministic generation agree;
+- [ ] tokenizer/config/checkpoint/model/generation configuration are distinguished;
+- [ ] one Hugging Face architecture path and the generic generation/cache paths have been traced;
+- [ ] MHA, MQA, and GQA can be compared by query-head and KV-head counts.
 
----
-
-## Primary Resources
-
-- [`../FOUNDATION/ATTENTION.pdf`](../FOUNDATION/ATTENTION.pdf)
-- [The Annotated Transformer](https://github.com/harvardnlp/annotated-transformer)
-- [LLMs from Scratch](https://github.com/rasbt/LLMs-from-scratch)
-- [Hugging Face Course](https://github.com/huggingface/course)
-- [Hugging Face Transformers](https://github.com/huggingface/transformers)
-- [Stanford CS336](https://github.com/stanford-cs336/lectures)
-- [`../RESOURCES/GITHUB-REPO-ATLAS.md`](../RESOURCES/GITHUB-REPO-ATLAS.md)
-
----
-
-**Previous:** [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md) ·
-**Next:** [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md) ·
-**Competency gates:** [`COMPETENCY-GATES.md`](COMPETENCY-GATES.md)
+The goal is source-level execution literacy, not memorizing every model API.

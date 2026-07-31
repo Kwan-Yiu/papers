@@ -12,23 +12,27 @@
 
 Do not read vLLM, SGLang, or TensorRT-LLM linearly. Enter each codebase through a concrete question:
 
-1. `cs336-lectures` — resource accounting, GPU systems, parallelism, and inference;
-2. `gpu-mode-lectures` — profiling, CUDA/Triton, and kernel optimization;
-3. `transformers` / `deepseek-v3` — model semantics and architecture deltas;
-4. `mamba` / `flash-linear-attention` — SSM, recurrence, and hybrid architectures;
-5. `flash-attention` / `flashinfer` — attention algorithm → serving kernel;
-6. `vllm` — scheduler, KV block manager, model runner, and attention/MoE backends;
-7. `sglang` — radix/prefix cache, scheduler, runtime, and wide EP;
-8. `sarathi-serve` / `distserve` — chunked prefill and PD disaggregation;
-9. `lmcache` / `mooncake` — tiered, remote, and disaggregated KV;
-10. `megatron-lm` / `tutel` / `deepspeed` — MoE router, dispatcher, and parallelism;
-11. `megablocks` / `deepgemm` — sparse/grouped expert compute;
-12. `deepep` / `flux` — EP dispatch/combine and communication overlap;
-13. `dynamo` / `llm-d` — cluster routing, KV-aware orchestration, and production deployment;
-14. `vidur` / `servegen` — simulation and realistic workload generation;
-15. `tensorrt-llm` — vendor-optimized runtime and low-precision paths;
-16. `model-optimizer` / `llm-compressor` — deployable quantization/compression;
-17. `speculators` / `eagle` — speculative decoding implementation.
+1. linked D2L, PyTorch, `micrograd`, and Zero-to-Hero resources — AI/ML prerequisites;
+2. reused `LLMs-from-scratch` and Annotated Transformer — decoder and attention mechanics;
+3. linked Hugging Face course plus local `transformers` — framework model/cache/generation paths;
+4. `cs336-lectures` — resource accounting, GPU systems, parallelism, and inference;
+5. `gpu-mode-lectures` — profiling, CUDA/Triton, and kernel optimization;
+6. linked Nano-vLLM/Mini-SGLang/Tiny-vLLM — readable engine paths;
+7. `transformers` / `deepseek-v3` — model semantics and architecture deltas;
+8. `mamba` / `flash-linear-attention` — SSM, recurrence, and hybrid architectures;
+9. `flash-attention` / `flashinfer` — attention algorithm → serving kernel;
+10. `vllm` — scheduler, KV block manager, model runner, and attention/MoE backends;
+11. `sglang` — radix/prefix cache, scheduler, runtime, and wide EP;
+12. `sarathi-serve` / `distserve` — chunked prefill and PD disaggregation;
+13. `lmcache` / `mooncake` — tiered, remote, and disaggregated KV;
+14. `megatron-lm` / `tutel` / `deepspeed` — MoE router, dispatcher, and parallelism;
+15. `megablocks` / `deepgemm` — sparse/grouped expert compute;
+16. `deepep` / `flux` — EP dispatch/combine and communication overlap;
+17. `dynamo` / `llm-d` — cluster routing, KV-aware orchestration, and production deployment;
+18. `vidur` / `servegen` — simulation and realistic workload generation;
+19. `tensorrt-llm` — vendor-optimized runtime and low-precision paths;
+20. `model-optimizer` / `llm-compressor` — deployable quantization/compression;
+21. `speculators` / `eagle` — speculative decoding implementation.
 
 ## Reused workspace instead of duplicate clones
 

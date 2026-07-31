@@ -2,9 +2,9 @@
 
 > **Target:** Database / systems researcher → LLM inference and AI systems researcher
 >
-> **Organization:** foundations → model → hardware/runtime → engine → serving → cluster → research
+> **Organization:** curated foundations → model → hardware/runtime → engine → serving → cluster → research
 >
-> **Progress model:** concepts, required builds, evidence, and exit gates; no calendar schedule
+> **Progress model:** external English reading paths, exact repository paths, evidence, and exit gates; no calendar schedule
 
 ## Main Path
 
@@ -25,8 +25,8 @@
 ## Evaluation Layer
 
 [`COMPETENCY-GATES.md`](COMPETENCY-GATES.md) is the cross-cutting evaluation document. It does not
-replace the learning path. Use it to verify that each layer produced enough code, quantitative
-reasoning, and evidence.
+replace the curated reading path. Use it to verify that each layer produced enough source-level,
+quantitative, and operational evidence.
 
 ## Dependency Map
 
@@ -78,6 +78,10 @@ concept can be explained
 → behavior can be measured
 → limitations can be stated
 ```
+
+The roadmap is a navigator, not a self-contained tutorial. Explanations come from the linked
+courses, blogs, documentation, papers, and repositories; these files specify dependencies, exact
+reading/code paths, and exit gates.
 
 ---
 

@@ -190,84 +190,35 @@ Read: [`09-bottleneck-research.md`](09-bottleneck-research.md) and
 
 ---
 
-## 3. Unified Inference Cost Model
+## 3. Source-Grounded Inference Cost Model
 
-Translate every architecture, kernel, scheduler, and placement proposal into the same resource
-language.
+The roadmap does not define a new cost-model tutorial. Use the following external sources, then
+apply their models consistently across architecture, kernel, scheduler, and placement work.
 
-### 3.1 Quantities
+| Topic | Core external source | Exact reading target | Roadmap use |
+|---|---|---|---|
+| compute, bandwidth, capacity | [How To Scale Your Model — Rooflines](https://jax-ml.github.io/scaling-book/roofline/) | full chapter | FLOPs, bytes, arithmetic intensity, lower bounds |
+| GPU and network topology | [How To Scale Your Model — GPUs](https://jax-ml.github.io/scaling-book/gpus/) | GPU hierarchy, collectives, LLM rooflines | chip/node/cluster cost |
+| Transformer FLOPs and shapes | [How To Scale Your Model — Transformer Math](https://jax-ml.github.io/scaling-book/transformers/) | forward-pass and sharding calculations | parameter and operator ledger |
+| inference prefill/decode | [Efficiently Scaling Transformer Inference](../PERF/TRANSFORMERINFER.pdf) | analytical model and evaluation | phase-specific compute/memory behavior |
+| framework overhead and fusion | [Making Deep Learning Go Brrrr](https://horace.io/brrr_intro.html) | overhead, fusion, memory, compilation | eager/compiler/kernel boundaries |
+| KV memory and paging | [vLLM](../SERVING/VLLM.pdf) | PagedAttention memory model | persistent inference state |
+| communication primitives | [NCCL Collective Operations](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html) | collective semantics | payload, rounds, and synchronization |
+| queueing and iteration scheduling | [Orca](../SERVING/ORCA.pdf) | iteration-level scheduling | online request interference |
+| serving objectives | [DistServe](../SERVING/DISTSERVE.pdf) and [Sarathi-Serve](../SERVING/SARATHI.pdf) | metrics and SLO evaluation | TTFT, TPOT/ITL, E2E, throughput, goodput |
+| production SLOs | [Google SRE — Service Level Objectives](https://sre.google/sre-book/service-level-objectives/) | full chapter | SLI/SLO/error-budget contract |
 
-| Quantity | Controls |
-|---|---|
-| FLOPs | arithmetic demand |
-| bytes moved | memory and interconnect traffic |
-| persistent bytes | weights, KV/state, adapters, buffers, metadata |
-| serial steps | autoregressive iterations, refinement, verification |
-| synchronization | launches, barriers, collectives, dispatch/combine |
-| queueing | waiting, interference, preemption, and tail latency |
+Required cost record for any later claim:
 
-### 3.2 Weight capacity
-
-```text
-weight_bytes ≈ parameter_count × bytes_per_weight
-```
-
-Separate total, resident, active, replicated, quantized, and temporarily staged weights.
-
-### 3.3 KV capacity
-
-For conventional attention:
-
-```text
-kv_bytes
-≈ 2 × layers × KV_heads × head_dimension
-  × retained_tokens × bytes_per_element
-```
-
-GQA, MQA, MLA, sliding windows, recurrent state, compression, and offload change this model.
-
-### 3.4 Roofline
-
-```text
-arithmetic_intensity = FLOPs / bytes_moved
-
-attainable_compute
-= min(peak_compute,
-      arithmetic_intensity × memory_bandwidth)
-```
-
-Prefill and decode occupy different shape and intensity regimes. Neither is universally compute- or
-memory-bound.
-
-### 3.5 Communication
-
-Record:
-
-```text
-payload bytes
-message count
-peers and hops
-link bandwidth/latency
-serialization
-synchronization
-contention
-load imbalance
-```
-
-Fewer bytes can still regress if a mechanism adds rounds, small messages, or critical-path skew.
-
-### 3.6 Serving objectives
-
-```text
-TTFT       = arrival → first token
-ITL / TPOT = time between output tokens
-E2E        = arrival → final token
-throughput = tokens or requests / second
-goodput    = requests / second satisfying all declared SLOs
-```
-
-Report workload distributions, saturation, percentiles, warmup, repetitions, model, precision,
-hardware, topology, software commit, and quality/SLO contract.
+- exact tensor/operator/request shape;
+- dtype and precision policy;
+- FLOPs and bytes moved;
+- persistent weights, KV/state, workspaces, and metadata;
+- serial steps, launches, barriers, collectives, and transfers;
+- request distribution, arrival process, queue state, and saturation;
+- predicted bottleneck before measurement;
+- measured profiler/serving evidence;
+- model, hardware, topology, software commit, and quality/SLO contract.
 
 ---
 
@@ -291,7 +242,10 @@ The project catalog is [`10-research-projects.md`](10-research-projects.md).
 
 | Source | Primary use |
 |---|---|
+| [Dive into Deep Learning](https://github.com/d2l-ai/d2l-en) | mathematics, ML, neural-network, and PyTorch prerequisites |
+| [PyTorch Tutorials](https://github.com/pytorch/tutorials) | official framework tutorials and recipes |
 | [LLMs from Scratch](https://github.com/rasbt/LLMs-from-scratch) | decoder and language-model basics |
+| [The Annotated Transformer](https://github.com/harvardnlp/annotated-transformer) | executable original Transformer |
 | [Hugging Face Transformers](https://github.com/huggingface/transformers) | model semantics and configuration |
 | [Stanford CS336](https://github.com/stanford-cs336/lectures) | model, systems, scaling, and evaluation |
 | [GPU MODE Lectures](https://github.com/gpu-mode/lectures) | GPU, kernels, and communication |
@@ -318,8 +272,8 @@ concept / paper claim
 
 ## 6. Competency Model
 
-The learning documents teach concepts and mechanisms. [`COMPETENCY-GATES.md`](COMPETENCY-GATES.md)
-defines the required evidence and exit gates.
+The roadmap documents curate external explanations and point to paper/code taxonomies.
+[`COMPETENCY-GATES.md`](COMPETENCY-GATES.md) defines the required evidence and exit gates.
 
 Use it to answer:
 

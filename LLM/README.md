@@ -8,20 +8,24 @@ designed for database and systems researchers moving into LLM inference.
 | Entry | Purpose |
 |---|---|
 | [`ROADMAP/README.md`](ROADMAP/README.md) | roadmap document map and navigation |
-| [`ROADMAP/00-roadmap.md`](ROADMAP/00-roadmap.md) | complete field map, cost model, and entry points |
-| [`ROADMAP/01-ai-ml-foundations.md`](ROADMAP/01-ai-ml-foundations.md) | AI/ML concepts, mathematics, neural networks, and PyTorch |
-| [`ROADMAP/02-transformer-foundations.md`](ROADMAP/02-transformer-foundations.md) | Transformer mechanics and Hugging Face Transformers |
+| [`ROADMAP/00-roadmap.md`](ROADMAP/00-roadmap.md) | complete field map, external cost-model sources, and entry points |
+| [`ROADMAP/01-ai-ml-foundations.md`](ROADMAP/01-ai-ml-foundations.md) | curated AI/ML, mathematics, neural-network, and PyTorch resources |
+| [`ROADMAP/02-transformer-foundations.md`](ROADMAP/02-transformer-foundations.md) | curated Transformer and Hugging Face tutorials plus exact source paths |
 | [`ROADMAP/03-modern-llm-architecture.md`](ROADMAP/03-modern-llm-architecture.md) | modern architecture → memory, compute, kernel, and communication costs |
-| [`ROADMAP/04-gpu-compiler-kernels.md`](ROADMAP/04-gpu-compiler-kernels.md) | GPU execution, profiling, compilers, and kernels |
-| [`ROADMAP/05-single-node-inference-engine.md`](ROADMAP/05-single-node-inference-engine.md) | complete single-node engine request and state path |
+| [`ROADMAP/04-gpu-compiler-kernels.md`](ROADMAP/04-gpu-compiler-kernels.md) | curated GPU, profiling, compiler, and kernel courses/source paths |
+| [`ROADMAP/05-single-node-inference-engine.md`](ROADMAP/05-single-node-inference-engine.md) | readable-engine courses and production-engine request/source paths |
 | [`ROADMAP/06-kv-scheduling-serving.md`](ROADMAP/06-kv-scheduling-serving.md) | KV/state, scheduling, decoding, and serving |
-| [`ROADMAP/07-distributed-inference-moe.md`](ROADMAP/07-distributed-inference-moe.md) | dense parallelism, communication, MoE, and expert parallelism |
-| [`ROADMAP/08-production-reliability.md`](ROADMAP/08-production-reliability.md) | production observability, overload, recovery, isolation, and cost |
+| [`ROADMAP/07-distributed-inference-moe.md`](ROADMAP/07-distributed-inference-moe.md) | curated distributed foundations plus MoE research taxonomy |
+| [`ROADMAP/08-production-reliability.md`](ROADMAP/08-production-reliability.md) | curated SRE/Kubernetes/LLM-platform operational reading map |
 | [`ROADMAP/09-bottleneck-research.md`](ROADMAP/09-bottleneck-research.md) | bottleneck classes, research questions, and evidence standards |
 | [`ROADMAP/10-research-projects.md`](ROADMAP/10-research-projects.md) | bounded systems-research project catalog |
 | [`ROADMAP/COMPETENCY-GATES.md`](ROADMAP/COMPETENCY-GATES.md) | cross-cutting required evidence and exit gates |
 | [`RESOURCES/GITHUB-REPO-ATLAS.md`](RESOURCES/GITHUB-REPO-ATLAS.md) | categorized English GitHub repository atlas |
 | [`RESOURCES/README.md`](RESOURCES/README.md) | local course, paper, and source-code entry points |
+
+The roadmap files are navigators rather than self-contained tutorials. They link to English courses,
+blogs, official documentation, papers, and repositories, then identify the exact chapters or source
+paths to read and the evidence required to move forward.
 
 ## Library
 

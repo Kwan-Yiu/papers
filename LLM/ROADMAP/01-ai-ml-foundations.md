@@ -1,637 +1,255 @@
-# AI, Machine Learning, and PyTorch Foundations
+# AI, Machine Learning, and PyTorch — Curated Reading Map
 
-> **Role:** establish the minimum AI foundation needed to understand and modify an LLM
->
-> **Audience:** systems researchers who do not yet have a complete ML background
->
-> **Boundary:** learn enough training semantics to reason about inference; this is not a general AI survey
-
-[Roadmap index](README.md) ·
-[Overview](00-roadmap.md) ·
-[Transformer foundations](02-transformer-foundations.md) ·
-[Competency gates](COMPETENCY-GATES.md)
+> **Role:** prerequisite map for a database/systems researcher entering LLM inference
+> **Target:** enough mathematics, machine learning, deep learning, and PyTorch to read Transformer and inference-system code
+> **Format:** external English tutorials, courses, books, documentation, and GitHub repositories
+> **Not included:** a self-contained tutorial, a calendar, or a general data-science curriculum
 
 ---
 
-## Learning Contract
+## How to Use This Map
 
-This layer is complete when the concepts below can be used in code and equations. Reading definitions
-without being able to inspect tensor shapes, gradients, loss, and model state is insufficient.
+Resource labels:
 
-```text
-data
-→ tensors
-→ model
-→ logits
-→ loss
-→ gradients
-→ optimizer update
-→ evaluation
-```
+- **Core** — follow the specified chapters or source paths.
+- **Branch** — use when a prerequisite is weak or a topic becomes relevant.
+- **Reference** — consult on demand; do not read front to back.
+- **Local PDF** — already stored in this repository.
+- **Link** — keep remote unless source modification or repeated offline use is needed.
 
-### Document guide
+The traversal is dependency-ordered, not time-based:
 
-| Section | Focus |
-|---|---|
-| 1 | AI/ML vocabulary and problem formulation |
-| 2 | just-in-time mathematics |
-| 3 | neural-network mechanics |
-| 4 | training, evaluation, and generalization |
-| 5 | PyTorch foundations |
-| 6 | required builds and exit gate |
+1. tensor and learning-loop vocabulary;
+2. just-in-time mathematics;
+3. neural-network mechanics;
+4. PyTorch execution;
+5. a small next-token model;
+6. the exit gate.
 
 ---
 
-## 1. AI and Machine-Learning Vocabulary
+## Coverage Checklist
 
-### 1.1 AI, machine learning, and deep learning
+### AI and machine learning
 
-| Term | Working definition |
-|---|---|
-| Artificial intelligence | systems that perform tasks associated with perception, prediction, reasoning, or action |
-| Machine learning | algorithms that fit behavior from data rather than only hand-written rules |
-| Deep learning | machine learning based on multi-layer differentiable neural networks |
-| Foundation model | a broadly trained model adapted or prompted for many downstream tasks |
-| Language model | a model that assigns probabilities to token sequences |
-| Large language model | a language model with enough capacity and data to support broad language behavior |
+- [ ] supervised, unsupervised, self-supervised, and reinforcement learning;
+- [ ] parameters, hyperparameters, features, labels, logits, probabilities, and loss;
+- [ ] training, validation, test, inference, and generalization;
+- [ ] empirical risk, overfitting, regularization, and distribution shift;
+- [ ] next-token prediction as self-supervised classification.
 
-For this roadmap, the important transition is:
+### Mathematics used later
 
-```text
-statistical model
-→ neural network
-→ sequence model
-→ Transformer language model
-→ stateful inference system
-```
+- [ ] vectors, matrices, tensors, broadcasting, and matrix multiplication;
+- [ ] dot products, norms, orthogonality, projection, eigenvalues, SVD, and low rank;
+- [ ] probability distributions, expectation, variance, maximum likelihood, and Bayes rule;
+- [ ] entropy, cross entropy, and KL divergence;
+- [ ] derivatives, gradients, chain rule, computation graphs, and automatic differentiation;
+- [ ] gradient descent, SGD, momentum, Adam, and numerical stability.
 
-### 1.2 Learning problem types
+### Neural networks and PyTorch
 
-| Type | Input | Target / feedback | LLM relevance |
-|---|---|---|---|
-| supervised learning | labeled examples | explicit target | SFT, classification, reward models |
-| self-supervised learning | raw data | target derived from data | next-token pretraining |
-| unsupervised learning | unlabeled data | structure/objective | representation and clustering concepts |
-| reinforcement learning | state/action interaction | reward | some post-training and agent policies |
-| preference learning | ranked/chosen responses | comparative signal | DPO/RLHF-style alignment |
-
-Only self-supervised next-token modeling is required before Transformer inference. The others are
-adjacent unless a workload depends on them.
-
-### 1.3 Dataset vocabulary
-
-- **sample/example:** one training instance;
-- **feature/input:** information given to the model;
-- **label/target:** desired prediction;
-- **training set:** data used to update parameters;
-- **validation set:** data used to select hyperparameters and detect overfitting;
-- **test set:** held-out data used for final reporting;
-- **batch:** examples processed together;
-- **epoch:** one pass over a finite training dataset;
-- **distribution shift:** production data differs from training/evaluation data.
-
-Never compare models or systems without checking whether preprocessing, tokenization, data split, and
-quality constraints are equivalent.
+- [ ] linear layers, embeddings, activation functions, normalization, and residual connections;
+- [ ] forward pass, loss, backward pass, optimizer step, and evaluation mode;
+- [ ] `Tensor`, dtype, device, layout, stride, view, and in-place operation;
+- [ ] `nn.Module`, parameters, buffers, state dictionaries, autograd, and `DataLoader`;
+- [ ] CPU/GPU transfer, mixed precision, inference mode, and reproducibility.
 
 ---
 
-## 2. Just-in-Time Mathematics
+## 1. Fast Orientation
 
-### 2.1 Scalars, vectors, matrices, and tensors
+Use one conceptual source and one code-first source. Do not collect several introductory courses that cover the same ground.
 
-```text
-scalar:  x              shape []
-vector:  x_i            shape [d]
-matrix:  X_ij           shape [m, n]
-tensor:  X_ijk...       shape [d1, d2, d3, ...]
-```
+| Priority | Resource | Format | Read / inspect | Extract |
+|---|---|---|---|---|
+| Core | [Dive into Deep Learning — Introduction](https://d2l.ai/chapter_introduction/index.html) | interactive book | Chapter 1 | the standard ML workflow and vocabulary |
+| Core | [Andrej Karpathy — Neural Networks: Zero to Hero](https://github.com/karpathy/nn-zero-to-hero) | video course + notebooks | course README; first `micrograd` lecture; `makemore_part1_bigrams.ipynb` | how scalar gradients become a next-token model |
+| Branch | [fast.ai Practical Deep Learning](https://course.fast.ai/) | course | Lessons 1–3 only if a top-down introduction is more useful | model, loss, data, training loop, and transfer-learning vocabulary |
+| Branch | [fastai/fastbook](https://github.com/fastai/fastbook) | book repo | `01_intro.ipynb`, then use the index to locate weak areas | an application-first view of deep learning |
 
-A tensor is both:
-
-1. a multidimensional array with a shape and dtype;
-2. a mathematical object participating in a computation graph.
-
-For every operation, write:
-
-```text
-input shapes
-output shape
-broadcast dimensions
-dtype
-device
-lifetime
-```
-
-### 2.2 Matrix multiplication
-
-```text
-X : [B, d_in]
-W : [d_in, d_out]
-Y = XW : [B, d_out]
-```
-
-Each output is a weighted sum:
-
-```text
-Y[b, j] = Σ_i X[b, i] W[i, j]
-```
-
-This one operation underlies embeddings, attention projections, FFNs, output heads, and most
-Transformer FLOPs.
-
-Approximate multiply-add work:
-
-```text
-FLOPs(XW) ≈ 2 × B × d_in × d_out
-```
-
-### 2.3 Dot products, similarity, and projection
-
-```text
-dot(x, y) = Σ_i x_i y_i
-```
-
-The dot product combines magnitude and directional alignment. Attention uses scaled dot products to
-compare queries and keys.
-
-Orthogonal projection onto a unit vector `u`:
-
-```text
-projection_u(x) = (x · u) u
-```
-
-Projection intuition is useful for embeddings, low-rank approximation, LoRA, and quantization error.
-
-### 2.4 Probability and distributions
-
-For mutually exclusive outcomes:
-
-```text
-p_i ≥ 0
-Σ_i p_i = 1
-```
-
-Conditional probability:
-
-```text
-P(A | B) = P(A, B) / P(B)
-```
-
-A language model factorizes a sequence:
-
-```text
-P(x_1, ..., x_T) = Π_t P(x_t | x_<t)
-```
-
-The model does not directly emit words; it emits logits that define a categorical distribution over
-the next token.
-
-### 2.5 Softmax and log-sum-exp
-
-For logits `z`:
-
-```text
-softmax(z_i) = exp(z_i) / Σ_j exp(z_j)
-```
-
-Stable implementation:
-
-```text
-softmax(z_i)
-= exp(z_i - max(z)) / Σ_j exp(z_j - max(z))
-```
-
-Log-sum-exp:
-
-```text
-log Σ_j exp(z_j)
-= m + log Σ_j exp(z_j - m), where m = max(z)
-```
-
-### 2.6 Cross entropy and maximum likelihood
-
-For correct class/token `y`:
-
-```text
-loss = -log p(y)
-```
-
-Minimizing token cross entropy is equivalent to maximizing the likelihood of observed next tokens.
-
-For a sequence:
-
-```text
-L = -Σ_t log P(x_t | x_<t)
-```
-
-Perplexity:
-
-```text
-perplexity = exp(mean token loss)
-```
-
-Perplexity is a model-quality metric, not a serving-performance metric.
-
-### 2.7 Gradients and the chain rule
-
-A gradient records how a scalar loss changes with each parameter:
-
-```text
-∂L / ∂W
-```
-
-For composed functions:
-
-```text
-y = f(g(x))
-dy/dx = (df/dg) × (dg/dx)
-```
-
-Backpropagation applies the chain rule in reverse topological order through the computation graph.
-
-### 2.8 Optimization
-
-Basic gradient descent:
-
-```text
-θ ← θ - η ∇_θ L
-```
-
-Where:
-
-- `θ` is the parameter set;
-- `η` is the learning rate;
-- `∇_θ L` is the gradient.
-
-Know the purpose of:
-
-- SGD and momentum;
-- Adam/AdamW;
-- learning-rate schedules;
-- gradient clipping;
-- weight decay;
-- gradient accumulation;
-- mixed-precision loss scaling.
-
-Detailed optimizer convergence theory is not required for inference-systems work.
-
-### 2.9 Low rank, SVD, and approximation
-
-Singular value decomposition:
-
-```text
-W = U Σ Vᵀ
-```
-
-Keeping only the largest `r` singular values gives a rank-`r` approximation. This supports intuition
-for:
-
-- LoRA and low-rank adapters;
-- weight compression;
-- low-rank KV/state representations;
-- approximation error versus memory/compute reduction.
+Stop this section when the terms in the AI/ML checklist can be placed into one training-and-inference diagram.
 
 ---
 
-## 3. Neural-Network Mechanics
+## 2. Mathematics: Minimum Core and Branches
 
-### 3.1 Parameters, activations, and buffers
+### 2.1 Linear algebra
 
-| State | Updated by optimizer? | Typical lifetime |
-|---|---:|---|
-| parameter | yes | model lifetime |
-| activation | no | forward/backward step |
-| gradient | derived | backward/update step |
-| persistent buffer | no | model lifetime |
-| optimizer state | optimizer-owned | training lifetime |
-| inference cache | no | request/session lifetime |
+| Priority | Resource | Format | Exact reading target | Why it belongs here |
+|---|---|---|---|---|
+| Core | [3Blue1Brown — Essence of Linear Algebra](https://www.3blue1brown.com/topics/linear-algebra) | visual series | vectors, linear combinations, matrix multiplication, change of basis, eigenvectors | geometric intuition before notation-heavy sources |
+| Core | [Dive into Deep Learning — Linear Algebra](https://d2l.ai/chapter_preliminaries/linear-algebra.html) | executable tutorial | entire section, including tensor reductions and matrix products | direct bridge from notation to tensor code |
+| Core | [MIT 18.06 Linear Algebra](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/) | university course | lectures on matrix spaces, orthogonality, eigenvalues, and SVD | durable foundation for projections and low-rank methods |
+| Branch | [MIT 18.065 Matrix Methods](https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/) | university course | low-rank matrices, SVD, PCA, and matrix factorization | quantization, compression, and low-rank adaptation |
+| Reference | [Mathematics for Machine Learning](https://mml-book.github.io/) | open book + repo | Chapters 2–4; Chapter 10 for dimensionality reduction | formal reference when MIT/D2L coverage is too compressed |
+| Reference | [d2l-ai/d2l-en](https://github.com/d2l-ai/d2l-en) | source repo | `chapter_preliminaries/linear-algebra.md`; `chapter_appendix-mathematics-for-deep-learning/` | Markdown source and executable examples |
 
-Do not confuse model parameters with runtime state such as KV cache.
+Reading check:
 
-### 3.2 Linear layer
+- trace the shapes of `X @ W`;
+- identify which dimension is reduced by a dot product;
+- connect SVD/low rank to weight or activation approximation.
 
-```text
-y = xW + b
-```
+### 2.2 Probability and information theory
 
-The linear layer changes representation dimension but does not add non-linearity by itself.
+| Priority | Resource | Format | Exact reading target | Extract |
+|---|---|---|---|---|
+| Core | [Dive into Deep Learning — Probability and Statistics](https://d2l.ai/chapter_preliminaries/probability.html) | executable tutorial | probability rules, random variables, expectation, variance | working probability vocabulary |
+| Core | [Stanford CS229 Notes](../COURSE/CS229-NOTES.pdf) | Local PDF | probability review; generative learning; maximum-likelihood passages | MLE, Bayes rule, Gaussian models |
+| Core | [D2L — Maximum Likelihood](https://d2l.ai/chapter_appendix-mathematics-for-deep-learning/maximum-likelihood.html) | tutorial/reference | entire section | connection between likelihood and loss |
+| Core | [D2L — Information Theory](https://d2l.ai/chapter_appendix-mathematics-for-deep-learning/information-theory.html) | tutorial/reference | entropy, cross entropy, KL divergence | language-model objectives and distribution comparison |
+| Branch | [Mathematics for Machine Learning](https://mml-book.github.io/) | open book | Chapter 6 | a more formal probability treatment |
 
-### 3.3 Activation functions
+Reading check:
 
-Know the shape-preserving behavior and qualitative properties of:
+- derive cross entropy for a categorical next-token target;
+- distinguish entropy, cross entropy, and KL divergence;
+- explain why maximizing likelihood becomes minimizing negative log likelihood.
 
-- ReLU;
-- GELU;
-- sigmoid;
-- tanh;
-- SiLU/Swish.
+### 2.3 Calculus, autograd, and optimization
 
-Modern decoder FFNs commonly use gated SiLU rather than a single activation.
+| Priority | Resource | Format | Exact reading target | Extract |
+|---|---|---|---|---|
+| Core | [3Blue1Brown — Neural Networks](https://www.3blue1brown.com/topics/neural-networks) | visual series | gradient descent and backpropagation episodes | visual model of gradients and chain rule |
+| Core | [Dive into Deep Learning — Calculus](https://d2l.ai/chapter_preliminaries/calculus.html) | executable tutorial | derivatives, partial derivatives, gradients, chain rule | notation needed for backpropagation |
+| Core | [D2L — Automatic Differentiation](https://d2l.ai/chapter_preliminaries/autograd.html) | executable tutorial | entire section | computation graph and gradient accumulation |
+| Core | [karpathy/micrograd](https://github.com/karpathy/micrograd) | compact source repo | `micrograd/engine.py`, `micrograd/nn.py`, `demo.ipynb`, tests | a complete reverse-mode autodiff engine and MLP |
+| Core | [D2L — Optimization Algorithms](https://d2l.ai/chapter_optimization/index.html) | interactive book | 12.1, 12.3–12.6, 12.9–12.10 | gradient descent, SGD, momentum, RMSProp, Adam |
+| Branch | [Convex Optimization — Boyd and Vandenberghe](../COURSE/BOYD-CVXBOOK.pdf) | Local PDF | Chapters 2–4 and 9 as reference | convexity, optimality, and descent methods |
 
-### 3.4 Multi-layer perceptron
+Repository reading path for `micrograd`:
 
-```text
-h = activation(xW_1 + b_1)
-y = hW_2 + b_2
-```
+1. `micrograd/engine.py` — scalar value, local derivative, topological backward pass;
+2. `micrograd/nn.py` — parameterized modules;
+3. `demo.ipynb` — loss and optimization loop;
+4. `test/test_engine.py` — cross-check against PyTorch.
 
-Without a non-linear activation, stacked linear layers collapse into one linear transformation.
-
-### 3.5 Normalization
-
-Understand:
-
-- feature mean/variance;
-- LayerNorm;
-- RMSNorm;
-- trainable scale and bias;
-- pre-norm versus post-norm placement.
-
-Normalization changes numerical behavior and kernel structure. Training-mode batch statistics are not
-part of LayerNorm/RMSNorm inference.
-
-### 3.6 Residual connections
-
-```text
-y = x + F(x)
-```
-
-Residual paths improve gradient flow and let blocks learn a change relative to their input. Shape
-compatibility is mandatory.
-
-### 3.7 Computation graph
-
-A computation graph records operations and data dependencies:
-
-```text
-input
-→ linear
-→ activation
-→ linear
-→ logits
-→ loss
-```
-
-This graph is central to both:
-
-- autograd during training;
-- graph capture, compilation, fusion, and runtime optimization during inference.
+Stop this section when a PyTorch gradient can be predicted before calling `backward()`.
 
 ---
 
-## 4. Training, Evaluation, and Generalization
+## 3. Machine Learning and Neural-Network Mechanics
 
-### 4.1 Training loop
+### 3.1 Linear models, classification, and generalization
 
-Canonical order:
+| Priority | Resource | Format | Exact reading target | Extract |
+|---|---|---|---|---|
+| Core | [D2L — Linear Neural Networks for Regression](https://d2l.ai/chapter_linear-regression/index.html) | interactive book | 3.1, 3.4–3.7 | loss, minibatches, implementation, generalization, weight decay |
+| Core | [D2L — Linear Neural Networks for Classification](https://d2l.ai/chapter_linear-classification/index.html) | interactive book | 4.1, 4.4–4.7 | softmax, cross entropy, classification, distribution shift |
+| Branch | [Stanford CS229 Notes](../COURSE/CS229-NOTES.pdf) | Local PDF | linear regression, logistic regression, regularization | a more formal derivation |
 
-```text
-model.train()
-→ load batch
-→ zero gradients
-→ forward
-→ compute loss
-→ backward
-→ optimizer step
-→ update metrics
-```
+### 3.2 MLPs, computation graphs, normalization, and residuals
 
-### 4.2 Evaluation loop
+| Priority | Resource | Format | Exact reading target | Extract |
+|---|---|---|---|---|
+| Core | [D2L — Multilayer Perceptrons](https://d2l.ai/chapter_multilayer-perceptrons/index.html) | interactive book | 5.1–5.6 | MLP, activations, backpropagation, initialization, generalization |
+| Core | [Karpathy Zero to Hero — makemore](https://github.com/karpathy/nn-zero-to-hero/tree/master/lectures/makemore) | notebooks + videos | parts 1–4 | bigram LM, MLP, normalization, manual backprop |
+| Core | [D2L — Residual Networks](https://d2l.ai/chapter_convolutional-modern/resnet.html) | tutorial | residual-block sections only | residual path and optimization motivation |
+| Branch | [D2L — Batch Normalization](https://d2l.ai/chapter_convolutional-modern/batch-norm.html) | tutorial | normalization mechanics; skip CNN-specific detail | normalization vocabulary before LayerNorm/RMSNorm |
 
-Canonical order:
-
-```text
-model.eval()
-→ disable gradient recording
-→ forward
-→ compute quality metrics
-```
-
-`model.eval()` and `torch.no_grad()` are different:
-
-- `eval()` changes module behavior such as dropout;
-- `no_grad()` disables autograd recording.
-
-### 4.3 Underfitting and overfitting
-
-| Pattern | Training loss | Validation loss | Interpretation |
-|---|---:|---:|---|
-| both high | high | high | underfitting or optimization failure |
-| train low, validation high | low | high | overfitting or distribution mismatch |
-| both low | low | low | good fit under this evaluation contract |
-
-### 4.4 Quality versus systems metrics
-
-Model metrics:
-
-- loss/perplexity;
-- accuracy/F1;
-- task score;
-- human/preference evaluation.
-
-Systems metrics:
-
-- latency;
-- throughput;
-- memory;
-- energy/cost;
-- SLO goodput.
-
-An optimization is invalid if it improves systems metrics by silently weakening the quality contract.
-
-### 4.5 Reproducibility
-
-Record:
-
-```text
-random seed
-dataset and split
-preprocessing
-model configuration
-initialization/checkpoint
-optimizer and learning rate
-precision
-software versions
-hardware
-commands
-```
-
-Deterministic execution can reduce performance and is not guaranteed across all GPU kernels. Declare
-the actual reproducibility level.
+Do not study the full CNN curriculum. The residual and normalization sections are included because those mechanisms recur in Transformers.
 
 ---
 
-## 5. PyTorch Foundations
+## 4. PyTorch Reading and Code Map
 
-### 5.1 Tensor essentials
+### 4.1 Official beginner spine
 
-Be fluent with:
+[PyTorch — Learn the Basics](https://docs.pytorch.org/tutorials/beginner/basics/intro.html) is the primary framework tutorial. Follow its official order:
 
-- `shape`, `dtype`, `device`, and `stride`;
-- indexing and slicing;
-- `reshape`, `view`, `transpose`, and `permute`;
-- broadcasting;
-- reductions;
-- matrix multiplication and `einsum`;
-- CPU/GPU transfer;
-- contiguous versus non-contiguous layouts.
+| Order | Official section | Required extraction |
+|---:|---|---|
+| 1 | [Quickstart](https://docs.pytorch.org/tutorials/beginner/basics/quickstart_tutorial.html) | dataset → model → loss → optimizer |
+| 2 | [Tensors](https://docs.pytorch.org/tutorials/beginner/basics/tensorqs_tutorial.html) | shape, dtype, device, indexing, broadcasting |
+| 3 | [Datasets and DataLoaders](https://docs.pytorch.org/tutorials/beginner/basics/data_tutorial.html) | sample, batch, shuffle, iteration |
+| 4 | [Transforms](https://docs.pytorch.org/tutorials/beginner/basics/transforms_tutorial.html) | preprocessing boundary |
+| 5 | [Build the Neural Network](https://docs.pytorch.org/tutorials/beginner/basics/buildmodel_tutorial.html) | `nn.Module`, submodules, parameters |
+| 6 | [Automatic Differentiation](https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html) | graph construction, gradients, disabling gradients |
+| 7 | [Optimization Loop](https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html) | training and evaluation loops |
+| 8 | [Save and Load](https://docs.pytorch.org/tutorials/beginner/basics/saveloadrun_tutorial.html) | `state_dict`, serialization boundary |
 
-### 5.2 Dtypes
+### 4.2 Systems-relevant PyTorch topics
 
-Know the practical role of:
+| Priority | Resource | Format | Read / inspect | Why |
+|---|---|---|---|---|
+| Core | [Autograd Mechanics](https://docs.pytorch.org/docs/stable/notes/autograd.html) | official note | graph recreation, saved tensors, grad modes, in-place correctness | framework execution and memory behavior |
+| Core | [CUDA Semantics](https://docs.pytorch.org/docs/stable/notes/cuda.html) | official note | asynchronous execution, streams, memory management, precision | CPU/GPU coordination |
+| Core | [Tensor Views](https://docs.pytorch.org/docs/stable/tensor_view.html) | official reference | views, contiguity, reshape behavior | layout-sensitive kernel behavior |
+| Core | [Numerical Accuracy](https://docs.pytorch.org/docs/stable/notes/numerical_accuracy.html) | official note | floating-point limits and reduced precision | correctness under mixed/low precision |
+| Core | [Reproducibility](https://docs.pytorch.org/docs/stable/notes/randomness.html) | official note | seeds, nondeterminism, deterministic operations | defensible comparisons |
+| Branch | [Automatic Mixed Precision](https://docs.pytorch.org/tutorials/recipes/recipes/amp_recipe.html) | official recipe | autocast and gradient scaling | dtype and throughput trade-offs |
+| Reference | [pytorch/tutorials](https://github.com/pytorch/tutorials) | source repo | `beginner_source/basics/`, `recipes_source/` | source behind the official tutorials |
+| Branch | [mrdbourke/pytorch-deep-learning](https://github.com/mrdbourke/pytorch-deep-learning) | course repo | Chapters 00–04; use notebooks for additional practice | slower, code-heavy PyTorch path |
 
-| dtype | Typical use |
-|---|---|
-| FP32 | stable reference and some accumulations |
-| FP16 | low memory/compute, narrower numerical range |
-| BF16 | low memory/compute with FP32-like exponent range |
-| FP8 | accelerator-dependent low-precision execution |
-| INT8/INT4 | quantized storage and supported kernels |
-| integer token IDs | tokenizer/model interface |
-
-### 5.3 `nn.Module`
-
-Understand:
-
-- parameter registration;
-- submodules;
-- `forward`;
-- buffers;
-- `state_dict`;
-- train/eval mode;
-- device and dtype movement;
-- hooks;
-- loading checkpoints with missing/unexpected keys.
-
-### 5.4 Autograd
-
-Be able to explain:
-
-- `requires_grad`;
-- leaf versus non-leaf tensors;
-- `grad_fn`;
-- accumulation in `.grad`;
-- `backward`;
-- graph retention;
-- `detach`;
-- in-place-operation hazards.
-
-### 5.5 Data input
-
-Know:
-
-- `Dataset`;
-- `DataLoader`;
-- shuffling;
-- collation and padding;
-- pinned host memory;
-- asynchronous device copies;
-- preprocessing/tokenization bottlenecks.
-
-### 5.6 Precision and execution modes
-
-Distinguish:
-
-- training mode;
-- evaluation mode;
-- `no_grad`;
-- `inference_mode`;
-- autocast/mixed precision;
-- compilation;
-- distributed wrappers.
-
-### 5.7 Saving and loading
-
-Understand the difference among:
-
-- Python object serialization;
-- `state_dict`;
-- model configuration;
-- tokenizer assets;
-- checkpoint shards;
-- SafeTensors;
-- optimizer state.
-
-Inference usually needs model configuration, tokenizer files, weights, and generation settings—not
-training optimizer state.
+Framework source reading is deferred. At this layer, use documentation and small programs; read PyTorch internals in the GPU/compiler layer.
 
 ---
 
-## 6. Required Builds
+## 5. Minimal Language-Model Bridge
 
-### Build A — Linear classifier
+The goal is to cross from generic deep learning into next-token prediction without yet learning the Transformer.
 
-Implement:
-
-```text
-data → linear layer → logits → cross entropy → gradient update
-```
+| Priority | Resource | Format | Exact path | Extract |
+|---|---|---|---|---|
+| Core | [Zero to Hero — makemore part 1](https://github.com/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part1_bigrams.ipynb) | notebook + video | full notebook | characters, vocabulary, counts, logits, sampling |
+| Core | [Zero to Hero — makemore part 2](https://github.com/karpathy/nn-zero-to-hero/blob/master/lectures/makemore/makemore_part2_mlp.ipynb) | notebook + video | full notebook | embeddings, context window, MLP language model |
+| Branch | [nanoGPT](https://github.com/karpathy/nanoGPT) | compact training repo | `model.py`, then `train.py`; stop before optimization details | how a small GPT training codebase is organized |
 
 Required evidence:
 
-- tensor shapes;
-- decreasing training loss;
-- separate validation metric;
-- parameter/gradient inspection;
-- saved and reloaded `state_dict`.
+- a shape ledger from token IDs to logits;
+- a short note mapping categorical cross entropy to next-token prediction;
+- one small PyTorch program that trains and samples from a character model;
+- a record of train/evaluation mode, seed, dtype, device, and loss.
 
-### Build B — Small MLP
+This is a learning artifact, not a research result.
 
-Add:
+---
 
-- hidden layer;
-- non-linearity;
-- normalization or residual path;
-- train/eval comparison.
+## 6. Repository Index
 
-Explain why the model cannot be collapsed into one linear transformation.
+| Repository | Use | Exact starting path | Status |
+|---|---|---|---|
+| [d2l-ai/d2l-en](https://github.com/d2l-ai/d2l-en) | book source and notebooks | `chapter_preliminaries/`, `chapter_linear-*`, `chapter_multilayer-perceptrons/` | Link |
+| [karpathy/micrograd](https://github.com/karpathy/micrograd) | autograd and MLP internals | `micrograd/engine.py` | Link |
+| [karpathy/nn-zero-to-hero](https://github.com/karpathy/nn-zero-to-hero) | neural nets and early language models | `lectures/micrograd/`, `lectures/makemore/` | Link |
+| [pytorch/tutorials](https://github.com/pytorch/tutorials) | official tutorial sources | `beginner_source/basics/` | Link |
+| [mml-book/mml-book.github.io](https://github.com/mml-book/mml-book.github.io) | formal mathematics reference | website and downloadable book | Link |
+| [fastai/fastbook](https://github.com/fastai/fastbook) | optional top-down introduction | `01_intro.ipynb` | Link |
+| [mrdbourke/pytorch-deep-learning](https://github.com/mrdbourke/pytorch-deep-learning) | optional extended PyTorch practice | numbered chapter notebooks | Link |
+| [karpathy/nanoGPT](https://github.com/karpathy/nanoGPT) | bridge to GPT code | `model.py`, `train.py` | Link |
 
-### Build C — Tiny next-token model
+Do not clone every repository. Clone only a repository whose code will be executed, modified, or repeatedly inspected offline.
 
-Before implementing a Transformer, build a minimal token model such as:
+---
 
-```text
-token IDs
-→ embedding
-→ context aggregation
-→ vocabulary logits
-→ shifted cross entropy
-```
+## 7. What to Defer
 
-The goal is to understand token prediction, shifting, sequence loss, and autoregressive sampling.
+Defer these topics until the corresponding roadmap layer:
+
+- CNN architecture surveys and computer-vision pipelines;
+- full convex-analysis proofs;
+- distributed training internals;
+- advanced reinforcement learning;
+- model alignment and post-training;
+- CUDA kernels and PyTorch compiler internals;
+- production serving frameworks.
+
+They are valuable, but they are not prerequisites for beginning Transformer inference.
 
 ---
 
 ## Exit Gate
 
-You can:
+Continue to [02-transformer-foundations.md](02-transformer-foundations.md) when all of the following are true:
 
-1. derive shapes for linear layers and batched matrix multiplication;
-2. convert logits to probabilities and compute cross entropy;
-3. explain forward, backward, gradients, and optimizer updates;
-4. distinguish parameters, activations, optimizer state, and inference state;
-5. write training and evaluation loops without copying a framework template blindly;
-6. inspect dtype, device, layout, and autograd state in PyTorch;
-7. save and reload a model correctly;
-8. separate model-quality metrics from system-performance metrics;
-9. explain next-token prediction well enough to enter Transformer mechanics.
+- [ ] tensor shapes and matrix multiplications can be traced without guessing;
+- [ ] softmax, cross entropy, maximum likelihood, and KL divergence can be distinguished;
+- [ ] a computation graph and reverse-mode automatic differentiation can be explained from `micrograd`;
+- [ ] a PyTorch training loop and evaluation loop can be read and modified;
+- [ ] parameters, buffers, gradients, optimizer state, dtype, device, layout, and serialization are distinguishable;
+- [ ] a small next-token model can be trained and sampled;
+- [ ] numerical or reproducibility claims are accompanied by seed, dtype, device, and evaluation mode.
 
----
-
-## Primary Resources
-
-- [`../COURSE/CS229-NOTES.pdf`](../COURSE/CS229-NOTES.pdf)
-- [`../COURSE/BOYD-CVXBOOK.pdf`](../COURSE/BOYD-CVXBOOK.pdf)
-- [MIT 18.06 Linear Algebra](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/)
-- [MIT 18.065 Matrix Methods](https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-fall-2018/)
-- [PyTorch documentation and source](https://github.com/pytorch/pytorch)
-- [Stanford CS336](https://github.com/stanford-cs336/lectures)
-
-Use these selectively according to the missing concept. Completing every proof is not a prerequisite
-for the next layer.
-
----
-
-**Previous:** [`00-roadmap.md`](00-roadmap.md) ·
-**Next:** [`02-transformer-foundations.md`](02-transformer-foundations.md) ·
-**Competency gates:** [`COMPETENCY-GATES.md`](COMPETENCY-GATES.md)
+The standard is operational literacy, not completion of every mathematics branch.

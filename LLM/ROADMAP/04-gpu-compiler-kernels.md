@@ -1,523 +1,361 @@
-# GPU, Compiler, and Kernel Foundations
+# GPU, Compiler, and Kernels — Curated Reading Map
 
-> **Role:** explain how Transformer operations become efficient accelerator execution
->
-> **Prerequisite:** Transformer shapes and costs from [`02-transformer-foundations.md`](02-transformer-foundations.md)
->
-> **Outcome:** predict and verify compute, memory, launch, compilation, and backend bottlenecks
-
-[Roadmap index](README.md) ·
-[Modern architecture](03-modern-llm-architecture.md) ·
-[Single-node engine](05-single-node-inference-engine.md) ·
-[Competency gates](COMPETENCY-GATES.md)
+> **Role:** hardware/software foundation for LLM inference performance
+> **Target:** move from PyTorch operators to traces, generated kernels, GPU memory traffic, and compiler decisions
+> **Format:** external English courses, official documentation, blogs, assignments, papers, and repository source paths
+> **Not included:** an original CUDA/Triton tutorial or a calendar
 
 ---
 
-## Execution Stack
+## Dependency Map
 
-```mermaid
-flowchart TD
-    M["Model code"] --> O["Framework operators"]
-    O --> G["Captured graph"]
-    G --> IR["Compiler IR"]
-    IR --> S["Scheduling + fusion"]
-    S --> K["Generated / library kernels"]
-    K --> R["GPU runtime"]
-    R --> H["SMs, caches, HBM, interconnect"]
+```text
+roofline and GPU model
+        |
+        +--> profiling and benchmark discipline
+        |
+        +--> CUDA execution and memory
+        |        |
+        |        +--> Triton kernels
+        |        +--> CUTLASS / CuTe
+        |        +--> attention kernels
+        |
+        +--> PyTorch dispatcher / compile stack
+                 |
+                 +--> graph capture and breaks
+                 +--> Inductor / Triton code generation
+                 +--> CUDA Graphs
 ```
 
-| Layer | Typical question |
-|---|---|
-| model/framework | are shapes, dtypes, and operators appropriate? |
-| graph compiler | was the graph captured, specialized, fused, and cached? |
-| kernel | are tiling, memory access, occupancy, and tensor-core use effective? |
-| runtime | are launches, streams, synchronization, and graph replay efficient? |
-| hardware | is the limit compute, memory, capacity, topology, or contention? |
+Resource labels:
+
+- **Core** — required;
+- **Branch** — follow when the topic is directly relevant;
+- **Reference** — use on demand;
+- **Local PDF** — already stored in this repository;
+- **Link** — do not clone unless executing or modifying the source.
 
 ---
 
-## 1. Accelerator Hardware Model
+## Coverage Checklist
 
-### 1.1 CPU and GPU roles
+### Hardware and cost
 
-An inference process commonly divides work into:
+- [ ] SM, warp, thread block, grid, tensor core, register, shared memory, L1/L2, HBM;
+- [ ] coalescing, bank conflicts, divergence, occupancy, synchronization, and launch overhead;
+- [ ] FLOPs, bytes moved, arithmetic intensity, memory capacity, latency, and bandwidth;
+- [ ] compute-bound, memory-bound, launch-bound, synchronization-bound, and communication-bound;
+- [ ] prefill versus decode GEMM and attention shapes.
 
-| CPU/control plane | GPU/data plane |
-|---|---|
-| API, tokenization, request state | model operators |
-| scheduling and batch assembly | attention and GEMM |
-| block-table preparation | KV reads/writes |
-| kernel launch and synchronization | sampling/fused post-processing |
-| networking and streaming | collectives and transfer kernels |
+### Profiling
 
-A GPU can be underutilized because the CPU did not prepare work fast enough.
+- [ ] CPU wall time versus asynchronous GPU time;
+- [ ] warmup, synchronization, event timing, repeated samples, and shape control;
+- [ ] PyTorch profiler, Nsight Systems, Nsight Compute, and generated-code inspection;
+- [ ] kernel timeline, launch gaps, utilization, memory traffic, occupancy, and achieved throughput.
 
-### 1.2 GPU execution hierarchy
+### Kernels and compilers
 
-Know:
-
-- kernel;
-- grid;
-- thread block / cooperative thread array;
-- warp/wavefront;
-- thread;
-- streaming multiprocessor / compute unit;
-- warp scheduling;
-- occupancy;
-- register and shared-memory limits.
-
-Occupancy is a constraint and diagnostic—not an objective that must always be maximized.
-
-### 1.3 Memory hierarchy
-
-From smallest/closest to largest/farthest:
-
-```text
-registers
-→ shared memory / local scratchpad
-→ L1
-→ L2
-→ HBM / device memory
-→ peer accelerator
-→ host DRAM
-→ local storage
-→ remote memory/storage
-```
-
-For every kernel, ask:
-
-- which bytes are loaded;
-- how many times they are reused;
-- whether accesses are coalesced;
-- whether layout causes gather/scatter;
-- whether capacity, bandwidth, or latency dominates.
-
-### 1.4 Tensor cores and matrix units
-
-Tensor cores accelerate supported matrix-multiply shapes and dtypes. Performance depends on:
-
-- tile alignment;
-- matrix dimensions;
-- accumulation dtype;
-- data layout;
-- batch/group size;
-- sparsity/quantization support;
-- software-library path.
-
-Theoretical peak FLOPs are irrelevant when shapes cannot use the fast path.
+- [ ] vector add, reduction, softmax, normalization, GEMM, and attention;
+- [ ] tiling, fusion, persistent kernels, grouped GEMM, and autotuning;
+- [ ] CUDA, Triton, CUTLASS, CuTe, cuBLAS, and attention backends;
+- [ ] dispatcher, Dynamo, FX, AOTAutograd, Inductor, Triton, guards, and graph breaks;
+- [ ] CUDA Graph capture constraints and replay.
 
 ---
 
-## 2. Performance Cost Model
+## 1. Performance Model Before Kernel Code
 
-### 2.1 Roofline
+### 1.1 Primary reading spine
 
-```text
-arithmetic_intensity = FLOPs / bytes_moved
+| Priority | Resource | Format | Exact reading target | Extract |
+|---|---|---|---|---|
+| Core | [How To Scale Your Model — All About Rooflines](https://jax-ml.github.io/scaling-book/roofline/) | systems book | full chapter | compute, bandwidth, memory-capacity lower bounds |
+| Core | [How To Scale Your Model — How to Think About GPUs](https://jax-ml.github.io/scaling-book/gpus/) | systems book | GPU hierarchy, networking, collectives, LLM rooflines | chip-to-cluster cost model |
+| Core | [Making Deep Learning Go Brrrr From First Principles](https://horace.io/brrr_intro.html) | systems blog | Parts 1–3 and the case study | eager overhead, fusion, memory traffic, compilation |
+| Core | [Efficiently Scaling Transformer Inference](../PERF/TRANSFORMERINFER.pdf) | Local PDF | analytical model and prefill/decode comparison | inference-specific arithmetic intensity |
+| Reference | [Roofline: An Insightful Visual Performance Model](../PERF/ROOFLINE.pdf) | Local PDF | model and limitations | canonical roofline formulation |
 
-attainable_compute
-= min(peak_compute,
-      arithmetic_intensity × memory_bandwidth)
-```
+### 1.2 Optional deeper courses
 
-Interpretation:
-
-- low arithmetic intensity tends toward bandwidth limitation;
-- high arithmetic intensity can approach compute limitation;
-- launch, synchronization, and queueing can dominate below both bounds.
-
-### 2.2 GEMM cost
-
-For:
-
-```text
-A : [M, K]
-B : [K, N]
-C : [M, N]
-```
-
-Approximate work:
-
-```text
-FLOPs ≈ 2MKN
-```
-
-Do not characterize a GEMM using FLOPs alone. Record `M/N/K`, dtype, layout, batch/grouping,
-epilogue, workspace, and backend.
-
-### 2.3 Prefill and decode shapes
-
-Prefill:
-
-- many prompt tokens;
-- larger `M`;
-- more parallel work;
-- attention cost grows with prompt length;
-- often favorable tensor-core utilization.
-
-Decode:
-
-- one/few new tokens per sequence;
-- smaller and ragged `M`;
-- repeated weight and KV reads;
-- launch/control overhead;
-- dynamic batch membership.
-
-### 2.4 Latency decomposition
-
-```text
-latency
-= queue
- + CPU preparation
- + launch
- + kernel execution
- + communication
- + synchronization
- + output processing
-```
-
-A profiler trace should explain every visible gap rather than reporting only GPU utilization.
-
----
-
-## 3. Profiling and Benchmarking
-
-### 3.1 Tool roles
-
-| Tool | Use |
-|---|---|
-| PyTorch Profiler | framework operators, CPU/GPU timeline, shapes, memory |
-| Nsight Systems | end-to-end CPU threads, CUDA launches, streams, collectives |
-| Nsight Compute | one-kernel instructions, memory, occupancy, tensor cores |
-| framework traces | scheduler, KV manager, batch composition |
-| NCCL/RCCL tests | communication primitives and topology |
-
-### 3.2 Benchmark hygiene
-
-Record:
-
-- warmup;
-- synchronization method;
-- input shapes/distributions;
-- dtype and backend;
-- compilation/tuning inclusion or exclusion;
-- repetitions and statistics;
-- accelerator clocks/power state;
-- software versions;
-- correctness tolerance.
-
-### 3.3 Common measurement errors
-
-- timing asynchronous GPU work with CPU wall time without synchronization;
-- measuring compilation on one path but not the baseline;
-- benchmarking one convenient shape;
-- reporting median kernel latency while the service is tail-latency limited;
-- ignoring generated backend changes;
-- using random inputs that remove real sparsity/skew/locality;
-- claiming end-to-end gain from an isolated operator speedup.
-
----
-
-## 4. Kernel Foundations
-
-### 4.1 Kernel classes in an LLM
-
-- GEMM and batched/grouped GEMM;
-- attention prefill;
-- paged/ragged decode attention;
-- normalization;
-- RoPE;
-- elementwise activation and residual;
-- quantization/dequantization;
-- MoE routing, permutation, expert GEMM, and combine;
-- sampling;
-- KV movement;
-- collective communication.
-
-### 4.2 Tiling
-
-Tiling decomposes a large operation into blocks that fit registers/shared memory and expose reuse.
-Trade-offs include:
-
-- tile reuse versus parallelism;
-- register pressure versus fewer loads;
-- shared-memory capacity versus occupancy;
-- padding versus irregular control;
-- static specialization versus shape portability.
-
-### 4.3 Fusion
-
-Fusion can:
-
-- eliminate intermediate HBM traffic;
-- reduce launch count;
-- improve producer/consumer locality.
-
-Fusion can regress by:
-
-- increasing registers;
-- reducing occupancy;
-- generating too many specialized variants;
-- blocking a faster vendor library;
-- increasing compilation cost.
-
-### 4.4 CUDA
-
-Understand:
-
-- kernel launches;
-- grids, blocks, and warps;
-- global/shared/register memory;
-- synchronization;
-- streams and events;
-- asynchronous copies;
-- CUDA Graphs;
-- memory allocation;
-- peer access.
-
-### 4.5 Triton
-
-Understand:
-
-- program IDs;
-- blocked tensor programs;
-- pointer arithmetic and masks;
-- loads/stores;
-- reductions;
-- autotuning;
-- compile-time constants;
-- layout and scheduling decisions.
-
-Triton simplifies kernel authoring but does not remove the need for a memory and shape model.
-
-### 4.6 CUTLASS, CuTe, and vendor libraries
-
-Use them to understand:
-
-- tensor layouts;
-- tiled matrix multiplication;
-- grouped GEMM;
-- epilogues;
-- architecture-specific primitives;
-- low-precision execution.
-
-Vendor libraries can outperform generated kernels but may expose fewer dynamic or fused variants.
-
-### 4.7 Attention kernels
-
-The key FlashAttention idea is to avoid materializing the full attention-score matrix in HBM by
-tiling and maintaining online softmax statistics.
-
-Serving adds:
-
-- variable lengths;
-- paged KV;
-- GQA/MQA/MLA layouts;
-- one-token decode;
-- split-KV reduction;
-- cache dtype conversion;
-- backend selection.
-
----
-
-## 5. Compiler and Runtime
-
-### 5.1 Eager execution
-
-Eager frameworks execute operators as Python reaches them. Advantages:
-
-- transparent debugging;
-- dynamic control flow;
-- simple semantics.
-
-Costs:
-
-- framework dispatch;
-- many launches;
-- limited cross-operator fusion;
-- CPU overhead.
-
-### 5.2 `torch.compile` path
-
-Know the roles of:
-
-```text
-TorchDynamo
-→ graph capture and guards
-AOTAutograd
-→ graph partition/decomposition
-Inductor
-→ scheduling, fusion, code generation
-Triton/CUDA/C++ backends
-→ kernels
-```
-
-### 5.3 Graph guards and breaks
-
-Graph capture may specialize on:
-
-- shapes;
-- dtypes;
-- devices;
-- Python values;
-- module state;
-- control-flow assumptions.
-
-A failed assumption can trigger a graph break or recompilation. Online serving naturally produces
-dynamic batch sizes, sequence lengths, block tables, routing decisions, and decoding branches.
-
-### 5.4 Intermediate representations
-
-An IR makes operations and data dependencies explicit so a compiler can:
-
-- decompose operators;
-- propagate shapes/layouts;
-- fuse operations;
-- plan memory;
-- select kernels;
-- generate code;
-- partition across devices.
-
-Relevant ecosystems include PyTorch FX/Inductor, Triton IR, MLIR, XLA/HLO, and TVM.
-
-### 5.5 CUDA Graphs
-
-CUDA Graphs record and replay a stable launch sequence, reducing CPU launch overhead.
-
-Serving challenges:
-
-- dynamic batch membership;
-- changing block tables;
-- variable sequence lengths;
-- MoE routing shapes;
-- speculative branch lengths;
-- adapter changes.
-
-Common strategies:
-
-- padding to captured buckets;
-- multiple graph sizes;
-- capture only the stable model core;
-- piecewise graphs;
-- dynamic-shape compilation outside replay.
-
-### 5.6 Compilation evidence
-
-Record:
-
-```text
-graph count
-graph breaks
-guards
-recompilations
-compile latency
-generated backend
-kernel count
-peak memory
-steady-state latency
-shape coverage
-```
-
----
-
-## 6. Cross-Accelerator Reasoning
-
-Separate portable principles from one backend:
-
-| Layer | NVIDIA | AMD | TPU / XLA |
+| Priority | Resource | Format | Read / inspect |
 |---|---|---|---|
-| programming | CUDA, Triton | HIP/ROCm, Triton variants | JAX/XLA |
-| matrix hardware | Tensor Cores | Matrix Cores | systolic/matrix units |
-| collectives | NCCL | RCCL | XLA collectives |
-| local fabric | NVLink/NVSwitch | platform-dependent xGMI/Infinity Fabric | ICI topology |
-| kernel libraries | cuBLAS/cuDNN/CUTLASS | rocBLAS/hipBLASLt/AITER/CK | XLA-generated/vendor stack |
+| Branch | [mryab/efficient-dl-systems](https://github.com/mryab/efficient-dl-systems) | university course repo | GPU/CUDA, benchmarking, profiling, compiler, and inference lectures |
+| Branch | [MLSysBook Volume 2](../COURSE/MLSYS-VOL2.pdf) | Local PDF | hardware acceleration and efficient inference chapters |
+| Reference | [MLSysBook online](https://mlsysbook.ai/) | open systems book | use the current web table of contents to match the Local PDF |
 
-You do not need equal implementation depth on every platform. You must state which claims depend on:
+Required evidence:
 
-- a memory hierarchy;
-- a supported dtype/tile;
-- a compiler feature;
-- a collective implementation;
-- a particular link topology.
+- one operator cost sheet with shape, dtype, FLOPs, bytes, arithmetic intensity, and predicted bound;
+- separate rows for prefill and single-token decode;
+- hardware assumptions with source links.
+
+Do not optimize a kernel before producing this cost sheet.
 
 ---
 
-## Required Builds
+## 2. CUDA Execution and Memory
 
-### Build A — Operator cost sheet
+### 2.1 Official NVIDIA path
 
-For GEMM, normalization, attention, and decode:
+| Priority | Resource | Format | Exact reading target |
+|---|---|---|---|
+| Core | [CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html) | official guide | programming model; execution model; memory hierarchy; asynchronous execution; streams; graphs |
+| Core | [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html) | official guide | performance metrics; memory optimization; execution configuration; instruction optimization |
+| Local | [CUDA Programming Guide](../COURSE/CUDA-PROGRAMMING-GUIDE.pdf) | Local PDF | offline copy; use web guide for current behavior |
+| Local | [CUDA Best Practices](../COURSE/CUDA-BEST-PRACTICES.pdf) | Local PDF | offline copy; use web guide for current behavior |
+| Reference | [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html) | official API reference | streams, events, memory, graphs, error handling |
 
-- derive FLOPs;
-- estimate bytes;
-- estimate arithmetic intensity;
-- predict the limiting resource;
-- compare with measurements.
+### 2.2 GPU Mode course path
 
-### Build B — One Triton or CUDA kernel
+Repository: [gpu-mode/lectures](https://github.com/gpu-mode/lectures)
+Videos: [GPU MODE YouTube channel](https://www.youtube.com/@GPUMODE)
 
-Implement or modify one relevant operator. Compare:
+| Order | Repository path | Topic |
+|---:|---|---|
+| 1 | `lecture_001/` | profiling and integrating CUDA kernels with PyTorch |
+| 2 | `lecture_003/pmpp.ipynb` | CUDA start for Python programmers |
+| 3 | `lecture_004/` | compute and memory architecture |
+| 4 | `lecture_005/matmul_l5.ipynb` | CUDA optimization progression |
+| 5 | `lecture_008/` | coalescing, tiling, divergence, occupancy, coarsening |
+| 6 | `lecture_009/` | reductions, determinism, accuracy |
+| 7 | `lecture_012/` | FlashAttention implementation |
+| 8 | `lecture_014/A_Practitioners_Guide_to_Triton.ipynb` | Triton programming |
+| 9 | `lecture_017/` | NCCL and collectives |
+| 10 | `lecture_018/` | fused kernels |
+| Branch | `lecture_023/`, `lecture_037/`, `lecture_041/`, `lecture_057/` | tensor cores, SASS, CUDA docs, CuTe |
 
-- correctness;
-- shapes;
-- latency;
-- memory traffic;
-- compile/tuning cost;
-- regression regions.
+The lecture repository changes over time. Use its root README as the source of truth for current lecture numbers and media links.
 
-### Build C — Compiler trace
+### 2.3 CUDA sample source map
 
-For one model block:
+Repository: [NVIDIA/cuda-samples](https://github.com/NVIDIA/cuda-samples)
 
-- compare eager and compiled execution;
-- locate graph breaks and guards;
-- inspect generated code or IR;
-- record recompilation;
-- explain a gain and a regression.
+| Topic | Source path |
+|---|---|
+| device and runtime basics | `Samples/1_Utilities/deviceQuery/`, `Samples/0_Introduction/` |
+| streams and overlap | search under `Samples/0_Introduction/` for asynchronous copy and streams |
+| reductions | `Samples/2_Concepts_and_Techniques/reduction/` |
+| matrix multiplication | `Samples/0_Introduction/matrixMul/` |
+| CUDA Graphs | graph samples under `Samples/3_CUDA_Features/` |
+| peer-to-peer | P2P samples under `Samples/0_Introduction/` and `Samples/5_Domain_Specific/` |
 
-### Build D — End-to-end trace
+Use the repository tree for the current exact directory names; samples can move between releases.
 
-Capture prefill and decode separately and label:
+---
 
-- CPU preparation;
-- graph/launch overhead;
-- kernels;
-- synchronization;
-- communication;
-- idle gaps.
+## 3. Benchmarking and Profiling
+
+### 3.1 Timing and profiler tutorials
+
+| Priority | Resource | Format | Exact reading target | Output |
+|---|---|---|---|---|
+| Core | [PyTorch Benchmark Recipe](https://docs.pytorch.org/tutorials/recipes/recipes/benchmark.html) | official recipe | `torch.utils.benchmark` workflow | reliable CPU/operator microbenchmarks |
+| Core | [PyTorch Profiler Recipe](https://docs.pytorch.org/tutorials/recipes/recipes/profiler_recipe.html) | official recipe | activities, schedules, traces, memory | operator and kernel timeline |
+| Core | [PyTorch CUDA Semantics](https://docs.pytorch.org/docs/stable/notes/cuda.html) | official note | asynchronous execution, streams, events, allocator | correct GPU timing |
+| Core | [Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) | official guide | CUDA trace, NVTX, CLI capture, statistics | end-to-end CPU/GPU timeline |
+| Core | [Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html) | official guide | metrics, sections, roofline, source correlation | per-kernel diagnosis |
+| Branch | [PyTorch Performance Tuning Guide](https://docs.pytorch.org/tutorials/recipes/recipes/tuning_guide.html) | official recipe | inference-relevant sections | checklist of framework-level issues |
+
+### 3.2 Required benchmark record
+
+Every performance record must include:
+
+- hardware and software versions;
+- exact tensor shapes, dtypes, strides, and device;
+- warmup policy and measured repetitions;
+- synchronization/timing mechanism;
+- median and tail or dispersion, not only the best sample;
+- correctness tolerance and reference implementation;
+- profiler evidence when the claimed cause is kernel-level;
+- generated code or compiler logs when the claimed cause is compiler-level.
+
+Required profiler views:
+
+1. PyTorch operator table;
+2. CPU/GPU timeline;
+3. one Nsight Compute kernel report;
+4. one source or generated-code correlation.
+
+---
+
+## 4. Triton Kernel Path
+
+### 4.1 Official tutorial sequence
+
+Use [Triton Tutorials](https://triton-lang.org/main/getting-started/tutorials/) in the published order:
+
+| Order | Tutorial | Required extraction |
+|---:|---|---|
+| 1 | [Vector Addition](https://triton-lang.org/main/getting-started/tutorials/01-vector-add.html) | program IDs, offsets, masks |
+| 2 | [Fused Softmax](https://triton-lang.org/main/getting-started/tutorials/02-fused-softmax.html) | fusion, row mapping, occupancy |
+| 3 | [Matrix Multiplication](https://triton-lang.org/main/getting-started/tutorials/03-matrix-multiplication.html) | blocking, pointer arithmetic, ordering, autotuning |
+| 4 | Low-Memory Dropout | seed/counter and masks |
+| 5 | Layer Normalization | reductions and backward path |
+| 6 | Fused Attention | tiled attention and online softmax |
+| Branch | Group GEMM | irregular/grouped workloads and MoE |
+| Branch | Persistent Matmul | persistent scheduling |
+| Branch | Block-Scaled Matmul | low-precision scaling formats |
+
+Repository: [triton-lang/triton](https://github.com/triton-lang/triton)
+
+Source path:
+
+1. `python/tutorials/`;
+2. `python/triton/language/` for the language surface;
+3. `python/triton/compiler/` for compilation entry points;
+4. `lib/` for compiler dialects and lowering;
+5. `third_party/` only for backend-specific work.
+
+### 4.2 Supplementary Triton sources
+
+| Priority | Resource | Exact target |
+|---|---|---|
+| Core | [GPU Mode Lecture 14](https://github.com/gpu-mode/lectures/tree/main/lecture_014) | `A_Practitioners_Guide_to_Triton.ipynb` |
+| Branch | [Triton Puzzles](https://github.com/srush/Triton-Puzzles) | puzzles in order; compare solutions after attempting each |
+| Branch | [stanford-cs336/assignment2-systems](https://github.com/stanford-cs336/assignment2-systems) | assignment handout attention/kernel optimization section and tests |
+| Reference | [gpu-mode/resource-stream](https://github.com/gpu-mode/resource-stream) | Triton compiler and kernel-resource indices |
+
+Required kernel evidence:
+
+- PyTorch reference output;
+- correctness across several shapes, including non-multiples of block size;
+- benchmark against the relevant PyTorch/vendor baseline;
+- profiler evidence for the limiting resource;
+- explanation tied to the roofline estimate.
+
+---
+
+## 5. CUTLASS, CuTe, and Vendor Libraries
+
+| Priority | Resource | Format | Read / inspect |
+|---|---|---|---|
+| Core | [CUTLASS documentation](https://docs.nvidia.com/cutlass/latest/) | official docs | quickstart, GEMM model, CuTe layouts, examples |
+| Core | [NVIDIA/cutlass](https://github.com/NVIDIA/cutlass) | source repo | `README.md`, `media/docs/`, `examples/`, `include/cutlass/`, `include/cute/` |
+| Branch | [CuTe DSL documentation](https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/cute_dsl.html) | official docs | layout algebra and Python DSL when targeting recent NVIDIA GPUs |
+| Branch | [GPU Mode CUTLASS lectures](https://github.com/gpu-mode/lectures) | lectures | Lectures 15, 36, 57, and later CuTe material |
+| Reference | [cuBLAS documentation](https://docs.nvidia.com/cuda/cublas/index.html) | official API | GEMM APIs, data types, algorithms, reproducibility |
+
+Read this branch when:
+
+- Triton lacks the required tensor-core feature;
+- a serving framework calls CUTLASS/CuTe kernels;
+- grouped GEMM or quantized GEMM needs vendor-specific control;
+- generated SASS or architecture-specific scheduling is part of the research question.
+
+---
+
+## 6. Attention Kernel Reading
+
+| Order | Resource | Format | Exact target |
+|---:|---|---|---|
+| 1 | [FlashAttention](../ATTENTION/FLASHATTN.pdf) | Local PDF | IO-awareness, tiling, online softmax, backward |
+| 2 | [FlashAttention-2](../ATTENTION/FLASHATTN2.pdf) | Local PDF | work partitioning and occupancy changes |
+| 3 | [FlashAttention-3](../ATTENTION/FLASHATTN3.pdf) | Local PDF | Hopper-specific asynchrony and low precision |
+| 4 | [Dao-AILab/flash-attention](https://github.com/Dao-AILab/flash-attention) | source repo | README → Python interface → `csrc/flash_attn/` |
+| 5 | [GPU Mode Lecture 12](https://github.com/gpu-mode/lectures/tree/main/lecture_012) | code + slides | `flash_attention.cu`, notebook, register-spilling example |
+| Branch | [FlashInfer paper](../ATTENTION/FLASHINFER.pdf) | Local PDF | serving-oriented attention abstraction |
+| Branch | [flashinfer-ai/flashinfer](https://github.com/flashinfer-ai/flashinfer) | source repo | docs, Python API, `csrc/`, JIT and serving integrations |
+
+When tracing a serving engine, record which attention backend is selected for:
+
+- prefill;
+- decode;
+- paged KV;
+- sliding-window or sparse attention;
+- MHA/GQA/MLA;
+- speculative verification.
+
+---
+
+## 7. PyTorch Compiler and Runtime
+
+### 7.1 Official documentation path
+
+| Priority | Resource | Exact reading target | Extract |
+|---|---|---|---|
+| Core | [Introduction to `torch.compile`](https://docs.pytorch.org/tutorials/intermediate/torch_compile_tutorial.html) | basic use, speedup, graph breaks, troubleshooting | public compilation workflow |
+| Core | [`torch.compile` programming model](https://docs.pytorch.org/docs/stable/user_guide/torch_compiler/compile/programming_model.html) | guards, graph breaks, dynamic shapes, recompilation | correctness and specialization constraints |
+| Core | [Profiling `torch.compile`](https://docs.pytorch.org/docs/stable/user_guide/torch_compiler/torch.compiler_profiling_torch_compile.html) | compilation time, graph breaks, generated kernels | evidence collection |
+| Core | [PyTorch compiler troubleshooting](https://docs.pytorch.org/docs/stable/torch.compiler_troubleshooting.html) | logs, minification, recompilation | debugging workflow |
+| Branch | [End-to-end `torch.compile`](https://docs.pytorch.org/tutorials/intermediate/torch_compile_full_example.html) | model-level compilation | whole-model boundary |
+| Branch | [CUDA Graphs in PyTorch](https://pytorch.org/blog/accelerating-pytorch-with-cuda-graphs/) | capture/replay model and constraints | launch-overhead reduction |
+
+### 7.2 Repository path
+
+Repository: [pytorch/pytorch](https://github.com/pytorch/pytorch)
+
+| Layer | Starting path |
+|---|---|
+| Python API | `torch/__init__.py`, `torch/_dynamo/` |
+| graph capture | `torch/_dynamo/` |
+| FX graph representation | `torch/fx/` |
+| AOTAutograd | `torch/_functorch/aot_autograd.py` and adjacent modules |
+| Inductor | `torch/_inductor/` |
+| generated Triton kernels | compiler debug output, then `torch/_inductor/codegen/` |
+| dispatcher/operator registration | `aten/`, `torch/library.py`, C++ dispatcher docs |
+| CUDA Graph integration | search `CUDAGraph` in Inductor/runtime paths |
+
+Do not read the PyTorch repository linearly. Start from one compiled model, enable logs, preserve the FX/Inductor artifacts, and follow only the path responsible for a concrete graph or kernel.
+
+### 7.3 Required compiler trace
+
+For one decoder block:
+
+1. capture eager operator trace;
+2. compile it with stable shapes;
+3. save graph-break and recompilation logs;
+4. save FX/Inductor graphs;
+5. inspect at least one generated Triton kernel;
+6. compare eager and compiled correctness;
+7. compare latency after excluding compilation;
+8. identify the remaining unfused kernels and why they remain separate.
+
+---
+
+## 8. Repository Index
+
+| Repository | Role | Exact starting path | Status |
+|---|---|---|---|
+| [gpu-mode/lectures](https://github.com/gpu-mode/lectures) | GPU course code and slides | root README; lectures 1, 3–5, 8–9, 12, 14, 17–18 | Link |
+| [gpu-mode/resource-stream](https://github.com/gpu-mode/resource-stream) | curated GPU resource index | topic directories and README | Link |
+| [mryab/efficient-dl-systems](https://github.com/mryab/efficient-dl-systems) | full efficient-DL systems course | current course outline | Link |
+| [jax-ml/scaling-book](https://github.com/jax-ml/scaling-book) | roofline and scaling source | roofline, GPU, inference, profiling chapters | Link |
+| [NVIDIA/cuda-samples](https://github.com/NVIDIA/cuda-samples) | CUDA reference samples | `Samples/` | Link |
+| [triton-lang/triton](https://github.com/triton-lang/triton) | language/compiler/tutorials | `python/tutorials/`, `python/triton/`, `lib/` | Link |
+| [srush/Triton-Puzzles](https://github.com/srush/Triton-Puzzles) | small Triton exercises | numbered puzzles | Link |
+| [NVIDIA/cutlass](https://github.com/NVIDIA/cutlass) | GEMM and CuTe infrastructure | `media/docs/`, `examples/`, `include/` | Link |
+| [Dao-AILab/flash-attention](https://github.com/Dao-AILab/flash-attention) | attention kernels | Python interface, `csrc/flash_attn/` | Link |
+| [flashinfer-ai/flashinfer](https://github.com/flashinfer-ai/flashinfer) | serving attention kernels | docs, Python API, `csrc/` | Link |
+| [pytorch/pytorch](https://github.com/pytorch/pytorch) | framework/compiler/runtime | `torch/_dynamo/`, `torch/_inductor/`, `aten/` | Link |
+| [stanford-cs336/assignment2-systems](https://github.com/stanford-cs336/assignment2-systems) | systems assignment and tests | assignment PDF and `tests/` | Link |
+
+---
+
+## 9. What to Defer
+
+Defer unless demanded by a concrete bottleneck:
+
+- hand-written SASS;
+- every CUDA memory space and instruction;
+- full MLIR/LLVM compiler implementation;
+- backward-only training kernels;
+- exotic accelerators unrelated to the target hardware;
+- architecture-specific tensor-core instructions before profiler evidence points there.
 
 ---
 
 ## Exit Gate
 
-You can:
+Continue to [05-single-node-inference-engine.md](05-single-node-inference-engine.md) when:
 
-1. derive a Roofline-style prediction for a Transformer operator;
-2. explain prefill/decode shape differences;
-3. read a GPU timeline and identify CPU, launch, memory, compute, and synchronization limits;
-4. explain tiling, coalescing, occupancy, registers, shared memory, and fusion trade-offs;
-5. modify a Triton/CUDA kernel and establish correctness;
-6. trace PyTorch model code through graph capture, IR, code generation, and dispatch;
-7. diagnose graph breaks and dynamic-shape recompilation;
-8. explain CUDA Graph applicability;
-9. state which findings are backend-specific;
-10. connect operator results to an end-to-end inference path.
+- [ ] prefill and decode operator shapes can be placed on a roofline;
+- [ ] GPU timing is correct under asynchronous execution;
+- [ ] a PyTorch profiler trace, Nsight Systems trace, and Nsight Compute report can be interpreted;
+- [ ] one CUDA or Triton kernel is correct across boundary shapes and benchmarked against a baseline;
+- [ ] tiling, fusion, occupancy, and memory coalescing can be connected to profiler evidence;
+- [ ] a `torch.compile` path can be traced through graph capture, Inductor, and generated Triton;
+- [ ] graph breaks, recompilation, and CUDA Graph constraints can be identified;
+- [ ] an attention backend can be located from a serving framework call site to its kernel repository.
 
----
-
-## Primary Resources
-
-- [`../PERF/ROOFLINE.pdf`](../PERF/ROOFLINE.pdf)
-- [`../COURSE/CUDA-PROGRAMMING-GUIDE.pdf`](../COURSE/CUDA-PROGRAMMING-GUIDE.pdf)
-- [`../COURSE/CUDA-BEST-PRACTICES.pdf`](../COURSE/CUDA-BEST-PRACTICES.pdf)
-- [GPU MODE Lectures](https://github.com/gpu-mode/lectures)
-- [Stanford CS336](https://github.com/stanford-cs336/lectures)
-- [Efficient Deep Learning Systems](https://github.com/mryab/efficient-dl-systems)
-- [Google DeepMind Scaling Book](https://github.com/jax-ml/scaling-book)
-- [Triton](https://github.com/triton-lang/triton)
-
----
-
-**Previous:** [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md) ·
-**Next:** [`05-single-node-inference-engine.md`](05-single-node-inference-engine.md) ·
-**Competency gates:** [`COMPETENCY-GATES.md`](COMPETENCY-GATES.md)
+The gate is evidence-based performance reasoning, not completion of every GPU resource.
