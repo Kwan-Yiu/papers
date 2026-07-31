@@ -10,6 +10,7 @@
 
 [Roadmap index](README.md) ·
 [Overview](00-roadmap.md) ·
+[Single-node optimization](04-single-node-inference-optimization.md) ·
 [Single-node engine](05-single-node-inference-engine.md) ·
 [Distributed inference and MoE](07-distributed-inference-moe.md) ·
 [Competency gates](COMPETENCY-GATES.md)
@@ -486,10 +487,12 @@ For each tier, report hit rate **and** service time distribution.
 | Method | Changes | Exact? | Main risk |
 |---|---|---|---|
 | GQA/MQA/MLA | model architecture/state representation | model-defined | needs trained model/backend |
+| CLA/MLKV/YOCO | state production/reuse across layers | model-defined/uptrained | model and backend availability |
 | lower KV precision | representation | approximate unless native | quality + dequant |
 | token eviction | retained positions | approximate | lost information |
 | sparse attention | accessed positions | usually approximate/model-defined | selection and gather |
 | sliding window | attention semantics | model-defined | no distant attention |
+| linear/recurrent/hybrid attention | persistent-state formulation | model-defined | training, recall and new kernels |
 | low-rank/compression | representation | approximate | decode overhead |
 | offload | location only | exact | transfer latency |
 | recomputation | regenerate state | exact if deterministic | compute latency |

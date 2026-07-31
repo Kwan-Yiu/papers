@@ -125,10 +125,11 @@ Symptoms:
 
 Techniques:
 
-- GQA/MQA/MLA;
+- GQA/MQA/MLA and cross-layer KV sharing;
 - paged/virtual KV;
 - KV quantization/compression;
 - sliding/sparse attention;
+- linear/recurrent/hybrid attention state;
 - tiered offload;
 - admission control.
 

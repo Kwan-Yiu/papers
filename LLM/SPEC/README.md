@@ -71,4 +71,4 @@ DIFFUSION (block diffusion → one-pass block drafting → draft trees over diff
 
 ## Sources
 All PDFs are from arXiv. Every ID was verified against its page-1 title before download.
-Download convention: `curl https://arxiv.org/pdf/<ID>` → `<NAME>.pdf`.
+Download convention: `curl arxiv.org/pdf/<ID>` → `<NAME>.pdf`.

@@ -22,7 +22,7 @@ layers that determine inference efficiency and reliability:
 AI/ML and PyTorch
 → Transformer mechanics
 → modern LLM architecture
-→ GPU, compiler, and kernels
+→ single-node inference optimization
 → single-node inference engine
 → KV cache, scheduling, and serving
 → distributed inference and MoE
@@ -86,22 +86,24 @@ Output: an architecture delta matrix that predicts memory, FLOPs, kernels, state
 
 Read: [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md).
 
-### Layer 04 — GPU, Compiler, and Kernels
+### Layer 04 — Single-Node Inference Optimization
 
 Learn:
 
-- GPU execution and memory hierarchy;
-- Roofline and arithmetic intensity;
-- GEMM/attention/kernel shapes;
-- profiling and benchmark hygiene;
-- CUDA, Triton, CUTLASS/CuTe, and vendor libraries;
-- graph capture, TorchDynamo, Inductor, compiler IR, and code generation;
-- CUDA Graphs and dynamic-shape constraints;
-- portable versus backend-specific reasoning.
+- source-grounded memory/FLOP/bandwidth models and profiler reconciliation;
+- weight, activation, KV, attention, and MoE quantization;
+- pruning, hardware-supported sparsity, structural reduction, and distillation boundaries;
+- KV selection, eviction, compression, tiering, and quality contracts;
+- MQA/GQA/MLA and cross-layer KV/attention sharing;
+- sliding-window, sparse, retrieval, linear, recurrent, SSM, and hybrid attention;
+- FlashAttention/FlashInfer and the boundary between algorithms and kernels;
+- GPU execution, CUDA, Triton, CUTLASS/CuTe, compilation, and CUDA Graphs;
+- production-engine configuration, backend dispatch, and fallback paths.
 
-Output: operator cost model, profiler trace, modified kernel, and compiler graph/IR trace.
+Output: a source-grounded optimization comparison that connects predicted resource reduction,
+measured memory/runtime evidence, quality, backend support, and end-to-end serving behavior.
 
-Read: [`04-gpu-compiler-kernels.md`](04-gpu-compiler-kernels.md).
+Read: [`04-single-node-inference-optimization.md`](04-single-node-inference-optimization.md).
 
 ### Layer 05 — Single-Node Inference Engine
 
@@ -202,6 +204,10 @@ apply their models consistently across architecture, kernel, scheduler, and plac
 | Transformer FLOPs and shapes | [How To Scale Your Model — Transformer Math](https://jax-ml.github.io/scaling-book/transformers/) | forward-pass and sharding calculations | parameter and operator ledger |
 | inference prefill/decode | [Efficiently Scaling Transformer Inference](../PERF/TRANSFORMERINFER.pdf) | analytical model and evaluation | phase-specific compute/memory behavior |
 | framework overhead and fusion | [Making Deep Learning Go Brrrr](https://horace.io/brrr_intro.html) | overhead, fusion, memory, compilation | eager/compiler/kernel boundaries |
+| memory measurement | [PyTorch — Understanding CUDA Memory Usage](https://docs.pytorch.org/docs/main/torch_cuda_memory) | snapshots, allocator state and visibility boundary | formula-versus-measurement reconciliation |
+| quantization concepts | [Hugging Face — Quantization concepts](https://huggingface.co/docs/transformers/quantization/concept_guide) | scheme, granularity, PTQ/QAT and formats | weight/activation/KV representation |
+| quantized deployment | [vLLM — Quantization](https://docs.vllm.ai/en/stable/features/quantization/index.html) | method and hardware support matrix | backend and hardware feasibility |
+| attention/KV architecture | [LLMs-from-scratch — Chapter 4 bonus material](https://github.com/rasbt/LLMs-from-scratch/tree/main/ch04) | GQA, MLA, window, DeltaNet, sparse and cross-layer sharing | readable mechanism and memory estimators |
 | KV memory and paging | [vLLM](../SERVING/VLLM.pdf) | PagedAttention memory model | persistent inference state |
 | communication primitives | [NCCL Collective Operations](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html) | collective semantics | payload, rounds, and synchronization |
 | queueing and iteration scheduling | [Orca](../SERVING/ORCA.pdf) | iteration-level scheduling | online request interference |
@@ -248,6 +254,7 @@ The project catalog is [`10-research-projects.md`](10-research-projects.md).
 | [The Annotated Transformer](https://github.com/harvardnlp/annotated-transformer) | executable original Transformer |
 | [Hugging Face Transformers](https://github.com/huggingface/transformers) | model semantics and configuration |
 | [Stanford CS336](https://github.com/stanford-cs336/lectures) | model, systems, scaling, and evaluation |
+| [LLMs from Scratch — Chapter 4 bonus material](https://github.com/rasbt/LLMs-from-scratch/tree/main/ch04) | memory analysis, KV, GQA, MLA, sliding window, DeltaNet, sparse attention, and cross-layer KV sharing |
 | [GPU MODE Lectures](https://github.com/gpu-mode/lectures) | GPU, kernels, and communication |
 | [Efficient Deep Learning Systems](https://github.com/mryab/efficient-dl-systems) | profiling, compilation, deployment, and inference |
 | [Google DeepMind Scaling Book](https://github.com/jax-ml/scaling-book) | topology, sharding, and cross-accelerator scaling |
@@ -294,6 +301,8 @@ The roadmap is complete when you can:
 - implement and inspect a decoder Transformer and Hugging Face causal LM;
 - reconstruct modern LLM architecture from configuration;
 - calculate parameter, activation, KV/state, FLOP, and communication costs;
+- classify and trace quantization, KV compression/eviction, efficient attention and cross-layer
+  sharing without conflating their semantic and systems layers;
 - trace model code through compiler IR, kernels, and runtime dispatch;
 - profile prefill/decode and predict bottlenecks;
 - trace requests through scheduler, model runner, attention backend, state manager, and streaming;

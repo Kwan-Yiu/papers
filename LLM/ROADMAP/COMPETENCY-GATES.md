@@ -117,7 +117,9 @@ Build an architecture delta matrix for:
 
 - MHA → GQA → MQA;
 - conventional attention → MLA;
-- full attention → sliding-window/sparse/hybrid attention;
+- per-layer KV → CLA/MLKV/YOCO-style cross-layer sharing;
+- full attention → sliding-window/sparse/retrieval attention;
+- softmax attention → linear/recurrent/SSM/hybrid state;
 - dense FFN → sparse MoE;
 - attention → recurrent/SSM/hybrid state;
 - one-token head → MTP/speculative-friendly heads;
@@ -145,12 +147,22 @@ compiler, kernel, and engine paths needed to verify the prediction.
 
 ---
 
-## Gate 04 — GPU, Compiler, and Kernels
+## Gate 04 — Single-Node Inference Optimization
 
-**Reference:** [`04-gpu-compiler-kernels.md`](04-gpu-compiler-kernels.md)
+**Reference:** [`04-single-node-inference-optimization.md`](04-single-node-inference-optimization.md)
 
 ### Required evidence
 
+- source-grounded parameter, KV/state, workspace, FLOP, and bandwidth prediction;
+- predicted-versus-measured memory reconciliation;
+- optimization classification by semantic, architecture, representation, kernel, runtime, and
+  scheduling layer;
+- MHA/GQA/MQA/MLA/cross-layer-sharing comparison;
+- full/sliding/sparse/linear/recurrent/hybrid attention comparison;
+- weight-only, weight-activation, KV, attention, and MoE quantization comparison;
+- calibration/outlier/scale/packing/dequantization/kernel inspection;
+- unstructured, N:M, and structured pruning with deployed-kernel inspection;
+- KV retention/compression/eviction comparison with quality and layout evidence;
 - Roofline-style operator cost sheet;
 - annotated PyTorch/Nsight trace;
 - one modified Triton or CUDA kernel;
@@ -166,6 +178,7 @@ compiler, kernel, and engine paths needed to verify the prediction.
 Before changing code, you can predict whether a target is limited by:
 
 ```text
+weight or KV capacity
 arithmetic throughput
 memory traffic
 launch/dispatch
@@ -175,7 +188,8 @@ communication
 insufficient parallelism
 ```
 
-You can then identify profiler/compiler evidence that would falsify the prediction.
+You can then select an optimization at the correct layer, trace it through a production engine and
+backend, and identify profiler, quality, and serving evidence that would falsify the prediction.
 
 ---
 
@@ -223,7 +237,7 @@ node, including CPU control-plane overhead and GPU idle gaps.
 
 ### Required evidence
 
-- KV capacity under MHA/GQA/MQA/MLA;
+- KV capacity under MHA/GQA/MQA/MLA and cross-layer sharing;
 - contiguous versus paged allocation comparison;
 - fragmentation and block-size sensitivity;
 - prefix reuse, admission, eviction, and prefetch policy;
@@ -267,8 +281,10 @@ goodput without shifting cost to another request class.
 
 ### Required evidence
 
-- weight-only, weight-activation, and KV quantization comparison;
+- weight-only, weight-activation, KV, attention, and MoE quantization comparison;
+- pruning/sparsity/model-size reduction with actual backend support;
 - calibration/outlier/scale/dequantization/kernel inspection;
+- token/head/layer retention, eviction and compression comparison;
 - speculative draft/verification/acceptance/rollback model;
 - model/head/feature/n-gram/prompt proposal comparison;
 - quality, memory, latency, throughput, and batch interaction;

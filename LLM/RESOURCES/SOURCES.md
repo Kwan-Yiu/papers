@@ -1,6 +1,6 @@
 # Sources and Pinned Repositories
 
-Downloaded and verified on 2026-07-30. "Core" means required by the prerequisite-driven competency
+Downloaded and verified on 2026-07-31. "Core" means required by the prerequisite-driven competency
 path; "directional" means read when selecting that research direction; "frontier" is a current
 problem snapshot.
 
@@ -36,6 +36,10 @@ problem snapshot.
 | [`ARCHITECTURE/QWEN3.pdf`](../ARCHITECTURE/QWEN3.pdf) | Qwen3 Technical Report | [arXiv 2505.09388](https://arxiv.org/abs/2505.09388) | Dense/MoE + reasoning modes |
 | [`ARCHITECTURE/DEEPSEEK-V2.pdf`](../ARCHITECTURE/DEEPSEEK-V2.pdf) | DeepSeek-V2 | [arXiv 2405.04434](https://arxiv.org/abs/2405.04434) | MLA + DeepSeekMoE |
 | [`ARCHITECTURE/DEEPSEEK-V3.pdf`](../ARCHITECTURE/DEEPSEEK-V3.pdf) | DeepSeek-V3 Technical Report | [arXiv 2412.19437](https://arxiv.org/abs/2412.19437) | MLA/MoE/MTP co-design |
+| [`ARCHITECTURE/CLA.pdf`](../ARCHITECTURE/CLA.pdf) | Reducing Transformer Key-Value Cache Size with Cross-Layer Attention | [arXiv 2405.12981](https://arxiv.org/abs/2405.12981) | Cross-layer KV sharing |
+| [`ARCHITECTURE/MLKV.pdf`](../ARCHITECTURE/MLKV.pdf) | Multi-Layer Key-Value Heads | [arXiv 2406.09297](https://arxiv.org/abs/2406.09297) | Cross-head/cross-layer KV sharing |
+| [`ARCHITECTURE/YOCO.pdf`](../ARCHITECTURE/YOCO.pdf) | You Only Cache Once | [arXiv 2405.05254](https://arxiv.org/abs/2405.05254) | Decoder-decoder shared KV |
+| [`ARCHITECTURE/LISA.pdf`](../ARCHITECTURE/LISA.pdf) | Cross-layer Attention Sharing for Large Language Models | [arXiv 2408.01890](https://arxiv.org/abs/2408.01890) | Cross-layer attention-map sharing |
 | [`ARCHITECTURE/YARN.pdf`](../ARCHITECTURE/YARN.pdf) | YaRN | [arXiv 2309.00071](https://arxiv.org/abs/2309.00071) | Context extension |
 | [`ARCHITECTURE/LONGROPE.pdf`](../ARCHITECTURE/LONGROPE.pdf) | LongRoPE | [arXiv 2402.13753](https://arxiv.org/abs/2402.13753) | Context extension |
 | [`ARCHITECTURE/MAMBA.pdf`](../ARCHITECTURE/MAMBA.pdf) | Mamba | [arXiv 2312.00752](https://arxiv.org/abs/2312.00752) | Selective SSM |
@@ -57,7 +61,13 @@ problem snapshot.
 | [`ATTENTION/FLASHATTN3.pdf`](../ATTENTION/FLASHATTN3.pdf) | FlashAttention-3 | [arXiv 2407.08608](https://arxiv.org/abs/2407.08608) | Kernel direction |
 | [`ATTENTION/FLASHINFER.pdf`](../ATTENTION/FLASHINFER.pdf) | FlashInfer | [arXiv 2501.01005](https://arxiv.org/abs/2501.01005) | Core serving kernels |
 | [`ATTENTION/MINFERENCE.pdf`](../ATTENTION/MINFERENCE.pdf) | MInference 1.0 | [arXiv 2407.02490](https://arxiv.org/abs/2407.02490) | Long-context direction |
+| [`ATTENTION/DUOATTENTION.pdf`](../ATTENTION/DUOATTENTION.pdf) | DuoAttention | [arXiv 2410.10819](https://arxiv.org/abs/2410.10819) | Retrieval/streaming head split |
 | [`ATTENTION/NSA.pdf`](../ATTENTION/NSA.pdf) | Native Sparse Attention | [arXiv 2502.11089](https://arxiv.org/abs/2502.11089) | Long-context direction |
+| [`ATTENTION/LINEAR-TRANSFORMER.pdf`](../ATTENTION/LINEAR-TRANSFORMER.pdf) | Transformers are RNNs | [arXiv 2006.16236](https://arxiv.org/abs/2006.16236) | Linear-attention foundation |
+| [`ATTENTION/BASED.pdf`](../ATTENTION/BASED.pdf) | Simple Linear Attention Language Models Balance the Recall-Throughput Tradeoff | [arXiv 2402.18668](https://arxiv.org/abs/2402.18668) | Local+linear hybrid |
+| [`ATTENTION/GLA.pdf`](../ATTENTION/GLA.pdf) | Gated Linear Attention Transformers | [arXiv 2312.06635](https://arxiv.org/abs/2312.06635) | Gated linear attention |
+| [`ATTENTION/DELTANET.pdf`](../ATTENTION/DELTANET.pdf) | Parallelizing Linear Transformers with the Delta Rule | [arXiv 2406.06484](https://arxiv.org/abs/2406.06484) | Delta-rule recurrent memory |
+| [`ATTENTION/KIMI-LINEAR.pdf`](../ATTENTION/KIMI-LINEAR.pdf) | Kimi Linear | [arXiv 2510.26692](https://arxiv.org/abs/2510.26692) | KDA/MLA hybrid |
 
 ## KV cache
 
@@ -66,7 +76,9 @@ problem snapshot.
 | [`CACHE/H2O.pdf`](../CACHE/H2O.pdf) | H2O: Heavy-Hitter Oracle | [arXiv 2306.14048](https://arxiv.org/abs/2306.14048) | Eviction direction |
 | [`CACHE/STREAMINGLLM.pdf`](../CACHE/STREAMINGLLM.pdf) | Efficient Streaming Language Models with Attention Sinks | [arXiv 2309.17453](https://arxiv.org/abs/2309.17453) | Streaming direction |
 | [`CACHE/KIVI.pdf`](../CACHE/KIVI.pdf) | KIVI | [arXiv 2402.02750](https://arxiv.org/abs/2402.02750) | Core KV quantization |
+| [`CACHE/KVQUANT.pdf`](../CACHE/KVQUANT.pdf) | KVQuant | [arXiv 2401.18079](https://arxiv.org/abs/2401.18079) | Low-bit KV and kernels |
 | [`CACHE/SNAPKV.pdf`](../CACHE/SNAPKV.pdf) | SnapKV | [arXiv 2404.14469](https://arxiv.org/abs/2404.14469) | Selection direction |
+| [`CACHE/PYRAMIDKV.pdf`](../CACHE/PYRAMIDKV.pdf) | PyramidKV | [arXiv 2406.02069](https://arxiv.org/abs/2406.02069) | Layer-adaptive KV budgets |
 | [`CACHE/VATTENTION.pdf`](../CACHE/VATTENTION.pdf) | vAttention | [arXiv 2405.04437](https://arxiv.org/abs/2405.04437) | Core virtual memory |
 | [`CACHE/MOONCAKE.pdf`](../CACHE/MOONCAKE.pdf) | Mooncake | [arXiv 2407.00079](https://arxiv.org/abs/2407.00079) | Core disaggregated KV |
 
@@ -90,11 +102,21 @@ problem snapshot.
 | File | Title | Source | Use |
 |---|---|---|---|
 | [`QUANT/LLMINT8.pdf`](../QUANT/LLMINT8.pdf) | LLM.int8() | [arXiv 2208.07339](https://arxiv.org/abs/2208.07339) | Foundation |
+| [`QUANT/ZEROQUANT.pdf`](../QUANT/ZEROQUANT.pdf) | ZeroQuant | [arXiv 2206.01861](https://arxiv.org/abs/2206.01861) | W+A PTQ and system co-design |
 | [`QUANT/GPTQ.pdf`](../QUANT/GPTQ.pdf) | GPTQ | [arXiv 2210.17323](https://arxiv.org/abs/2210.17323) | Foundation |
 | [`QUANT/SMOOTHQUANT.pdf`](../QUANT/SMOOTHQUANT.pdf) | SmoothQuant | [arXiv 2211.10438](https://arxiv.org/abs/2211.10438) | Core |
 | [`QUANT/AWQ.pdf`](../QUANT/AWQ.pdf) | AWQ | [arXiv 2306.00978](https://arxiv.org/abs/2306.00978) | Core |
 | [`QUANT/ATOM.pdf`](../QUANT/ATOM.pdf) | Atom | [arXiv 2310.19102](https://arxiv.org/abs/2310.19102) | Serving direction |
 | [`QUANT/QUAROT.pdf`](../QUANT/QUAROT.pdf) | QuaRot | [arXiv 2404.00456](https://arxiv.org/abs/2404.00456) | Rotation direction |
+| [`QUANT/SPINQUANT.pdf`](../QUANT/SPINQUANT.pdf) | SpinQuant | [arXiv 2405.16406](https://arxiv.org/abs/2405.16406) | Learned-rotation direction |
+| [`QUANT/QLLM-EVAL.pdf`](../QUANT/QLLM-EVAL.pdf) | Evaluating Quantized Large Language Models | [arXiv 2402.18158](https://arxiv.org/abs/2402.18158) | Broad W/A/KV evaluation |
+
+## Pruning and model compression
+
+| File | Title | Source | Use |
+|---|---|---|---|
+| [`COMPRESSION/SPARSEGPT.pdf`](../COMPRESSION/SPARSEGPT.pdf) | SparseGPT | [arXiv 2301.00774](https://arxiv.org/abs/2301.00774) | One-shot weight sparsity |
+| [`COMPRESSION/WANDA.pdf`](../COMPRESSION/WANDA.pdf) | A Simple and Effective Pruning Approach for Large Language Models | [arXiv 2306.11695](https://arxiv.org/abs/2306.11695) | Activation-aware pruning |
 
 ## Parallelism and MoE
 
@@ -185,6 +207,10 @@ The 30 speculative-decoding sources are recorded separately in
 | `repos/eagle` | [SafeAILab/EAGLE](https://github.com/SafeAILab/EAGLE) | `cb7e0841fe0c` |
 | `repos/model-optimizer` | [NVIDIA/Model-Optimizer](https://github.com/NVIDIA/Model-Optimizer) | `4c3d364750a6` |
 | `repos/llm-compressor` | [vllm-project/llm-compressor](https://github.com/vllm-project/llm-compressor) | `8cec0acc1931` |
+| `repos/kimi-linear` | [MoonshotAI/Kimi-Linear](https://github.com/MoonshotAI/Kimi-Linear) | `8c1d85eb6b5f` |
+| `repos/duo-attention` | [mit-han-lab/duo-attention](https://github.com/mit-han-lab/duo-attention) | `fe93c314ae87` |
+| `repos/kvpress` | [NVIDIA/kvpress](https://github.com/NVIDIA/kvpress) | `fcd17d7013be` |
+| `repos/pythia-mlkv` | [zaydzuhri/pythia-mlkv](https://github.com/zaydzuhri/pythia-mlkv) | `c2ad06518e36` |
 
-All 33 repositories were verified shallow and clean after clone. They occupy approximately 4.8 GiB total;
+All 37 repositories were verified shallow and clean after clone. They occupy approximately 4.9 GiB total;
 no model checkpoints or Python environments were downloaded.

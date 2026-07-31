@@ -12,7 +12,7 @@ designed for database and systems researchers moving into LLM inference.
 | [`ROADMAP/01-ai-ml-foundations.md`](ROADMAP/01-ai-ml-foundations.md) | curated AI/ML, mathematics, neural-network, and PyTorch resources |
 | [`ROADMAP/02-transformer-foundations.md`](ROADMAP/02-transformer-foundations.md) | curated Transformer and Hugging Face tutorials plus exact source paths |
 | [`ROADMAP/03-modern-llm-architecture.md`](ROADMAP/03-modern-llm-architecture.md) | modern architecture → memory, compute, kernel, and communication costs |
-| [`ROADMAP/04-gpu-compiler-kernels.md`](ROADMAP/04-gpu-compiler-kernels.md) | curated GPU, profiling, compiler, and kernel courses/source paths |
+| [`ROADMAP/04-single-node-inference-optimization.md`](ROADMAP/04-single-node-inference-optimization.md) | curated quantization, KV compression, efficient attention, profiling, GPU, compiler, and kernel paths |
 | [`ROADMAP/05-single-node-inference-engine.md`](ROADMAP/05-single-node-inference-engine.md) | readable-engine courses and production-engine request/source paths |
 | [`ROADMAP/06-kv-scheduling-serving.md`](ROADMAP/06-kv-scheduling-serving.md) | KV/state, scheduling, decoding, and serving |
 | [`ROADMAP/07-distributed-inference-moe.md`](ROADMAP/07-distributed-inference-moe.md) | curated distributed foundations plus MoE research taxonomy |
@@ -29,9 +29,9 @@ paths to read and the evidence required to move forward.
 
 ## Library
 
-The curated library contains **121 PDFs**:
+The curated library contains **138 PDFs**:
 
-- **116 research papers** across eleven themes;
+- **133 research papers** across twelve themes;
 - **5 course/reference PDFs**;
 - [`SPEC/`](SPEC/README.md) remains a focused collection of 30 speculative-decoding papers.
 
@@ -39,10 +39,11 @@ The curated library contains **121 PDFs**:
 |---|---:|---|
 | [`FOUNDATION/`](FOUNDATION/README.md) | 3 | Transformer, Llama, reasoning workloads |
 | [`PERF/`](PERF/README.md) | 4 | Roofline, inference cost, offload |
-| [`ARCHITECTURE/`](ARCHITECTURE/README.md) | 22 | MQA/GQA, RoPE, model deltas, SSM/hybrid, MTP, dynamic depth, diffusion LM |
-| [`ATTENTION/`](ATTENTION/README.md) | 6 | FlashAttention/FlashInfer, long-context sparse attention |
-| [`CACHE/`](CACHE/README.md) | 6 | KV eviction, quantization, virtual memory, disaggregation |
-| [`QUANT/`](QUANT/README.md) | 6 | INT8/INT4, PTQ, outlier/rotation |
+| [`ARCHITECTURE/`](ARCHITECTURE/README.md) | 26 | MQA/GQA/MLA, cross-layer KV/attention sharing, model deltas, SSM/hybrid |
+| [`ATTENTION/`](ATTENTION/README.md) | 12 | FlashAttention/FlashInfer, sparse, linear/recurrent and hybrid attention |
+| [`CACHE/`](CACHE/README.md) | 8 | KV eviction, selection, quantization, virtual memory, disaggregation |
+| [`QUANT/`](QUANT/README.md) | 9 | weight/activation/KV quantization, PTQ, outliers and rotations |
+| [`COMPRESSION/`](COMPRESSION/README.md) | 2 | weight sparsity, pruning and model compression |
 | [`SERVING/`](SERVING/README.md) | 10 | batching, PagedAttention, SLO scheduling, PD disaggregation |
 | [`PARALLEL/`](PARALLEL/README.md) | 1 | tensor/model parallel foundation |
 | [`MOE/`](MOE/README.md) | 18 | routing, shared/fine-grained/extreme-scale experts, kernels, EP, offload |
@@ -52,10 +53,12 @@ The curated library contains **121 PDFs**:
 
 ## Local source repositories
 
-`RESOURCES/repos/` contains **33 shallow clones** pinned in
+`RESOURCES/repos/` contains **37 shallow clones** pinned in
 [`RESOURCES/SOURCES.md`](RESOURCES/SOURCES.md). The first wave covers serving engines, kernels,
 KV systems, simulation and courses. The second wave adds model semantics, SSM/hybrid architectures,
 MoE frameworks/kernels/communication, cluster orchestration, quantization and speculative decoding.
+The latest additions cover hybrid linear attention, cross-layer KV sharing, head-adaptive retention,
+and unified KV compression evaluation.
 
 The broader categorized list—including linked repositories that were intentionally not cloned and
 archived/moved warnings—is in

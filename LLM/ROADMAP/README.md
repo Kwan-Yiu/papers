@@ -2,7 +2,7 @@
 
 > **Target:** Database / systems researcher → LLM inference and AI systems researcher
 >
-> **Organization:** curated foundations → model → hardware/runtime → engine → serving → cluster → research
+> **Organization:** curated foundations → model → single-node optimization → engine → serving → cluster → research
 >
 > **Progress model:** external English reading paths, exact repository paths, evidence, and exit gates; no calendar schedule
 
@@ -14,7 +14,7 @@
 | 01 | [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md) | How do tensors, neural networks, loss, gradients, and PyTorch work? |
 | 02 | [`02-transformer-foundations.md`](02-transformer-foundations.md) | How does a Transformer predict and generate tokens, including Hugging Face usage? |
 | 03 | [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md) | How do modern architecture choices change systems cost? |
-| 04 | [`04-gpu-compiler-kernels.md`](04-gpu-compiler-kernels.md) | How does model code become efficient accelerator execution? |
+| 04 | [`04-single-node-inference-optimization.md`](04-single-node-inference-optimization.md) | Which model, compression, attention, kernel, compiler, and runtime techniques remove a measured single-node bottleneck? |
 | 05 | [`05-single-node-inference-engine.md`](05-single-node-inference-engine.md) | How does one node multiplex requests, execution, and KV state? |
 | 06 | [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md) | How do cache, scheduling, decoding, and serving policies interact? |
 | 07 | [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md) | How do parallelism, topology, communication, and MoE scale inference? |
@@ -36,7 +36,7 @@ flowchart TD
     F["01 · AI/ML + PyTorch"]
     T["02 · Transformer + HF"]
     A["03 · Modern architecture"]
-    G["04 · GPU + compiler + kernels"]
+    G["04 · Single-node optimization"]
     E["05 · Single-node engine"]
     S["06 · KV + scheduling + serving"]
     D["07 · Distributed + MoE"]
@@ -62,7 +62,7 @@ flowchart TD
 | new to AI/ML | start at [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md) |
 | comfortable with PyTorch and training | start at [`02-transformer-foundations.md`](02-transformer-foundations.md) |
 | understands decoder/KV mechanics | start at [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md) |
-| already builds models but lacks systems depth | start at [`04-gpu-compiler-kernels.md`](04-gpu-compiler-kernels.md) |
+| already builds models but lacks systems depth | start at [`04-single-node-inference-optimization.md`](04-single-node-inference-optimization.md) |
 | already works on inference engines | use [`09-bottleneck-research.md`](09-bottleneck-research.md) to locate gaps |
 
 Skipping a layer is valid only when its exit criteria can already be defended.

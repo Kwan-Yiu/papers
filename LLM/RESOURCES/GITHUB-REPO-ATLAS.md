@@ -94,6 +94,8 @@ default.
 | A | L | [QwenLM/Qwen3](https://github.com/QwenLM/Qwen3) | dense + MoE, thinking/non-thinking family | controlled dense/MoE study and official model info |
 | A | L | [state-spaces/mamba](https://github.com/state-spaces/mamba) | selective SSM, Mamba/Mamba-2 | fixed-state/scan alternative to KV attention |
 | A | L | [fla-org/flash-linear-attention](https://github.com/fla-org/flash-linear-attention) | linear attention, SSM and hybrid kernels | emerging architecture implementations and efficient ops |
+| A | L | [MoonshotAI/Kimi-Linear](https://github.com/MoonshotAI/Kimi-Linear) | KDA + MLA hybrid linear attention | current model, evaluation and serving reference |
+| B | L | [zaydzuhri/pythia-mlkv](https://github.com/zaydzuhri/pythia-mlkv) | multi-layer KV heads | cross-head/cross-layer KV-sharing reference |
 | B | Link | [ML-GSAI/LLaDA](https://github.com/ML-GSAI/LLaDA) | diffusion language model | non-autoregressive iterative generation and cache/scheduler study |
 | B | Link | [kuleshov-group/mdlm](https://github.com/kuleshov-group/mdlm) | masked diffusion language model | denoising schedule and parallel token-update reference |
 | B | Link | [BlinkDL/RWKV-LM](https://github.com/BlinkDL/RWKV-LM) | recurrent LLM | constant-state autoregressive execution |
@@ -155,10 +157,11 @@ default.
 | B | Link | [bytedance/InfiniStore](https://github.com/bytedance/InfiniStore) | distributed KV store | cross-node KV storage |
 | B | Link | [alibaba/tair-kvcache](https://github.com/alibaba/tair-kvcache) | KV cache system + simulation | global cache management |
 | B | Link | [taco-project/FlexKV](https://github.com/taco-project/FlexKV) | multi-level distributed KV | Dynamo-integrated offload direction |
-| B | Link | [NVIDIA/kvpress](https://github.com/NVIDIA/kvpress) | KV compression framework | unified evaluation and integration of compression methods |
+| A | L | [NVIDIA/kvpress](https://github.com/NVIDIA/kvpress) | KV compression framework | unified implementation and evaluation of retention/compression methods |
 | B | Link | [Zefan-Cai/KVCache-Factory](https://github.com/Zefan-Cai/KVCache-Factory) | KV compression methods | algorithm comparison |
 | B | Link | [microsoft/MInference](https://github.com/microsoft/MInference) | sparse long-context prefill | dynamic sparse attention |
 | B | Link | [mit-han-lab/streaming-llm](https://github.com/mit-han-lab/streaming-llm) | attention sinks/streaming | bounded-window streaming behavior |
+| B | L | [mit-han-lab/duo-attention](https://github.com/mit-han-lab/duo-attention) | retrieval/streaming head split | head-adaptive KV retention and sparse kernels |
 | B | Link | [SqueezeAILab/KVQuant](https://github.com/SqueezeAILab/KVQuant) | KV quantization | long-context low-bit KV |
 | B | Link | [ByteDance-Seed/ShadowKV](https://github.com/ByteDance-Seed/ShadowKV) | long-context KV optimization | low-rank/key cache direction |
 | B | Link | [UChi-JCL/CacheGen](https://github.com/UChi-JCL/CacheGen) | KV compression/streaming | remote KV transfer compression |
@@ -212,6 +215,8 @@ default.
 | B | Link | [spcl/QuaRot](https://github.com/spcl/QuaRot) | rotation-based 4-bit | end-to-end research implementation |
 | B | Link | [efeslab/Atom](https://github.com/efeslab/Atom) | low-bit serving | systems-oriented quantization |
 | B | Link | [intel/auto-round](https://github.com/intel/auto-round) | low-bit quantization | multi-hardware and engine integrations |
+| B | Link | [IST-DASLab/sparsegpt](https://github.com/IST-DASLab/sparsegpt) | one-shot pruning | unstructured and semi-structured weight sparsity |
+| B | Link | [locuslab/wanda](https://github.com/locuslab/wanda) | activation-aware pruning | readable post-training pruning baseline |
 | C | Link | [AutoGPTQ/AutoGPTQ](https://github.com/AutoGPTQ/AutoGPTQ) | GPTQ wrapper | **Archived**; prefer current engine/compressor paths |
 | C | Link | [casper-hansen/AutoAWQ](https://github.com/casper-hansen/AutoAWQ) | AWQ wrapper | **Archived**; prefer maintained integrations |
 

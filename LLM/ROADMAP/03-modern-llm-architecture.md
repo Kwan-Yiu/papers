@@ -9,7 +9,7 @@
 [Roadmap index](README.md) ·
 [Overview](00-roadmap.md) ·
 [Transformer foundations](02-transformer-foundations.md) ·
-[GPU/compiler/kernels](04-gpu-compiler-kernels.md) ·
+[Single-node optimization](04-single-node-inference-optimization.md) ·
 [Competency gates](COMPETENCY-GATES.md)
 
 ---
@@ -197,7 +197,35 @@ Measure independently:
 An eightfold reduction in KV does not guarantee an eightfold end-to-end speedup. Weight GEMMs,
 scheduling, sampling, and communication remain.
 
-### 2.7 Attention span and sparsity
+External tutorial bridge:
+
+- [LLMs-from-scratch — GQA](https://github.com/rasbt/LLMs-from-scratch/tree/main/ch04/04_gqa);
+- [LLMs-from-scratch — MLA](https://github.com/rasbt/LLMs-from-scratch/tree/main/ch04/05_mla).
+
+### 2.7 Cross-layer KV and attention sharing
+
+Do not treat all cross-layer methods as the same mechanism. Use the external
+[Cross-Layer KV Sharing tutorial](https://github.com/rasbt/LLMs-from-scratch/tree/main/ch04/10_kv-sharing),
+then compare:
+
+| Source | Shared object | Systems question |
+|---|---|---|
+| [CLA](../ARCHITECTURE/CLA.pdf) | K/V heads across adjacent layers | KV capacity and decode reads |
+| [MLKV](../ARCHITECTURE/MLKV.pdf) | KV heads across head and layer groups | memory-quality frontier |
+| [YOCO](../ARCHITECTURE/YOCO.pdf) | global KV built once and reused by a cross-decoder | cache-once architecture and prefill |
+| [LiSA](../ARCHITECTURE/LISA.pdf) | aligned/approximated attention maps | attention compute and approximation |
+
+Reference paths:
+
+```text
+RESOURCES/repos/pythia-mlkv/
+RESOURCES/repos/flash-linear-attention/fla/models/yoco/
+```
+
+Record whether the model was trained with sharing, converted, or uptrained, and separate KV sharing
+from attention-map sharing.
+
+### 2.8 Attention span and sparsity
 
 | Pattern | Query attends to | Complexity intuition | Serving concern |
 |---|---|---|---|
@@ -218,7 +246,7 @@ Record the semantics of every sparse method:
 - whether prefill and decode use the same pattern;
 - whether quality is measured by perplexity, task accuracy, or long-context retrieval.
 
-### 2.8 Feed-forward network
+### 2.9 Feed-forward network
 
 A common dense FFN is:
 
@@ -247,7 +275,7 @@ Comparison dimensions:
 FFN/GEMM often accounts for most weight reads during decode. Once attention is optimized, the FFN
 can become the new dominant bottleneck.
 
-### 2.9 Dense vs sparse MoE FFN
+### 2.10 Dense vs sparse MoE FFN
 
 MoE replaces one FFN with multiple experts and a router:
 
@@ -279,7 +307,7 @@ Even when each token activates only a few experts, all expert weights must still
 or accessed remotely. Dynamic routing also creates irregular small GEMMs, all-to-all traffic, and
 tail imbalance.
 
-### 2.10 Recurrence, SSM, retention and hybrid blocks
+### 2.11 Recurrence, SSM, retention and hybrid blocks
 
 | Family | Persistent state | Parallel prefill | Incremental decode |
 |---|---|---|---|
@@ -299,7 +327,7 @@ New systems questions:
 - How should speculative rollback restore state?
 - Should heterogeneous layers be placed or scheduled separately?
 
-### 2.11 Multi-token heads and speculative-friendly architecture
+### 2.12 Multi-token heads and speculative-friendly architecture
 
 Categories:
 
@@ -324,7 +352,7 @@ batch_interference
 
 MTP can be a training objective or an inference draft source. Do not conflate the two roles.
 
-### 2.12 Dynamic depth and conditional layer execution
+### 2.13 Dynamic depth and conditional layer execution
 
 Mixture-of-Depths, early exit, and layer skipping extend conditional computation from choosing an
 FFN expert to deciding whether a token executes a block. Record separately:
@@ -344,7 +372,7 @@ gather/compact, execution, and scatter while disrupting fixed batch shapes. The 
 lower block FLOPs; the costs are routing, data movement, small GEMMs, and warp under-utilization.
 Report measured kernel time rather than only theoretical FLOPs.
 
-### 2.13 Diffusion and masked iterative generation
+### 2.14 Diffusion and masked iterative generation
 
 An autoregressive LM appends one or a few tokens per step. A masked diffusion LM begins with a
 masked sequence and updates multiple positions through repeated denoising/refinement. The primary
@@ -362,7 +390,7 @@ This is not merely a sampler change: generation dependencies, cache semantics, b
 control all change. Read MDLM and LLaDA first, then compare against an autoregressive baseline at
 matched model quality, output length, and end-to-end latency budget.
 
-### 2.14 Precision as part of architecture execution
+### 2.15 Precision as part of architecture execution
 
 Distinguish:
 
@@ -399,6 +427,7 @@ This table records only systems-relevant deltas. It does not rank model capabili
 | Mixtral | Mistral-style attention + sparse top-2 MoE FFN | expert weight capacity, dispatch and small GEMM |
 | Qwen2/Qwen3 | dense and MoE variants; broad model/config range | one family for dense-vs-MoE controlled study |
 | DeepSeek-V2/V3 | MLA + fine-grained/shared-expert MoE; V3 adds aux-loss-free balance and MTP | compressed state + wide EP + MTP co-design |
+| Kimi Linear | KDA linear attention + periodic MLA + sparse MoE | fixed recurrent state, hybrid layer schedule and long-context kernels |
 | GPT-OSS | open-weight MoE model and optimized reference paths | modern MoE backend portability |
 | Mamba/Mamba-2 | selective SSM / state-space duality | fixed state, scan kernels, hybrid serving |
 | RWKV | Transformer-trainable recurrent execution | constant state and recurrent batching |
@@ -412,10 +441,11 @@ This table records only systems-relevant deltas. It does not rank model capabili
 2. Mistral dense vs Mixtral MoE;
 3. Qwen dense vs Qwen MoE at similar active parameter scale;
 4. standard GQA vs DeepSeek MLA;
-5. attention-only vs Mamba/hybrid with equal workload;
-6. MTP/speculation on and off under the same arrival trace;
-7. fixed depth vs token-conditional depth with matched quality;
-8. autoregressive vs diffusion generation with matched quality, output length and SLO.
+5. conventional per-layer KV vs CLA/MLKV/YOCO-style layer sharing;
+6. attention-only vs Mamba/DeltaNet/Kimi Linear hybrid with equal workload;
+7. MTP/speculation on and off under the same arrival trace;
+8. fixed depth vs token-conditional depth with matched quality;
+9. autoregressive vs diffusion generation with matched quality, output length and SLO.
 
 Do not compare models with unrelated quality and scale and attribute the entire result to one
 architecture feature.
@@ -429,6 +459,7 @@ architecture feature.
 | MHA | baseline | high | high for long context | baseline | TP-dependent | low |
 | GQA/MQA | same-ish | lower | lower | similar | may change TP layout | low |
 | MLA | projection-dependent | much lower latent state | lower state read, extra transforms | changed | implementation-dependent | medium |
+| Cross-layer KV sharing | similar | lower by sharing group | fewer layer-specific KV reads | changed projections/reuse | implementation-dependent | medium |
 | Sliding window | same | bounded for local layers | bounded local reads | lower at long context | low | window metadata |
 | Sparse/retrieval attention | same | stored KV may remain large | selected reads | selection + attention | possibly remote | high |
 | Dense FFN | high | none persistent | high weight reads | regular GEMM | TP collectives | low |
@@ -529,6 +560,8 @@ Model definition tells semantics; serving engine tells the actual execution. Com
 - `RESOURCES/repos/deepseek-v3/inference/configs`
 - `RESOURCES/repos/mamba/mamba_ssm`
 - `RESOURCES/repos/flash-linear-attention/fla`
+- `RESOURCES/repos/kimi-linear`
+- `RESOURCES/repos/pythia-mlkv`
 - `/home/junyao/code/study/tutorials/llm/LLMs-from-scratch`
 - `/home/junyao/code/study/tutorials/transformer/annotated-transformer`
 
@@ -597,7 +630,15 @@ Measure:
 - TP communication;
 - prefill/decode crossover.
 
-### A5 — Attention vs SSM/hybrid state
+### A5 — Per-layer KV vs cross-layer sharing
+
+- conventional per-layer KV versus CLA/MLKV-style groups;
+- training/uptraining requirement;
+- KV bytes and decode traffic;
+- quality and long-context behavior;
+- backend support.
+
+### A6 — Attention vs SSM/hybrid state
 
 Use the same prompt/output distributions.
 
@@ -610,7 +651,7 @@ Measure:
 - prefix reuse feasibility;
 - quality at short and long range.
 
-### A6 — MTP/speculative head
+### A7 — MTP/speculative head
 
 Sweep workload, temperature and output length.
 
@@ -642,13 +683,13 @@ After completing this chapter, you should be able to analyze a new model configu
 
 Local PDFs are in [`../ARCHITECTURE/`](../ARCHITECTURE/README.md). Key papers include:
 
-- MQA, GQA, RoPE, RMSNorm, GLU variants, ALiBi;
+- MQA, GQA, CLA, MLKV, YOCO, RoPE, RMSNorm, GLU variants, ALiBi;
 - Mistral, Llama 3, Qwen3, DeepSeek-V2/V3;
-- Mamba/Mamba-2, RetNet, RWKV, Griffin;
+- Linear Transformer, Based, GLA, DeltaNet, Kimi Linear, Mamba/Mamba-2, RetNet, RWKV, Griffin;
 - YaRN, LongRoPE, Multi-token Prediction.
 
 ---
 
 **Previous:** [`02-transformer-foundations.md`](02-transformer-foundations.md) ·
-**Next:** [`04-gpu-compiler-kernels.md`](04-gpu-compiler-kernels.md) ·
+**Next:** [`04-single-node-inference-optimization.md`](04-single-node-inference-optimization.md) ·
 **MoE deep dive:** [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md)

@@ -14,6 +14,6 @@ MIT 18.06 and 18.065 remain linked online because they are course collections ra
 canonical PDF:
 
 - [MIT 18.06 Linear Algebra](https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/)
-- [MIT 18.065 Matrix Methods](https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-fall-2018/)
+- [MIT 18.065 Matrix Methods](https://ocw.mit.edu/courses/18-065-matrix-methods-in-data-analysis-signal-processing-and-machine-learning-spring-2018/)
 - [Stanford CS336, Spring 2026](https://cs336.stanford.edu/)
 - [Making Deep Learning Go Brrrr](https://horace.io/brrr_intro.html)

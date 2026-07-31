@@ -196,11 +196,11 @@ This section points forward to [03-modern-llm-architecture.md](03-modern-llm-arc
 | Topic | Core external explanation | Primary paper / local source | Code anchor |
 |---|---|---|---|
 | RoPE | [EleutherAI — Rotary Embeddings: A Relative Revolution](https://blog.eleuther.ai/rotary-embeddings/) | [RoFormer](../ARCHITECTURE/ROPE.pdf) | Hugging Face Llama/Qwen rotary classes |
-| RMSNorm | [Sebastian Raschka — LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture/) | [RMSNorm](../ARCHITECTURE/RMSNORM.pdf) | `LlamaRMSNorm` |
+| RMSNorm | [Sebastian Raschka — LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/) | [RMSNorm](../ARCHITECTURE/RMSNORM.pdf) | `LlamaRMSNorm` |
 | SwiGLU / GLU variants | [Noam Shazeer — GLU Variants Improve Transformer](../ARCHITECTURE/GLU-VARIANTS.pdf) | same Local PDF | model MLP class |
 | MQA | [Fast Transformer Decoding](../ARCHITECTURE/MQA.pdf) | Local PDF | KV-head count in config/model |
 | GQA | [GQA](../ARCHITECTURE/GQA.pdf) | Local PDF | repeat/group KV implementation |
-| Decoder families | [Sebastian Raschka — LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture/) | Llama, Mistral, Qwen, DeepSeek local PDFs | corresponding HF model directories |
+| Decoder families | [Sebastian Raschka — LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/) | Llama, Mistral, Qwen, DeepSeek local PDFs | corresponding HF model directories |
 
 Do not treat architecture diagrams as implementation truth. Confirm every shape and configuration field in source.
 
