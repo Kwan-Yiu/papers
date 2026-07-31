@@ -1,10 +1,12 @@
 # QUANT
 
 Curated external path for LLM inference quantization. QLoRA is a low-bit fine-tuning method and is
-not treated as the inference mainline.
+not treated as the inference mainline; it is included as the adaptation boundary.
 
 Companion map:
-[`../ROADMAP/04-single-node-inference-optimization.md`](../ROADMAP/04-single-node-inference-optimization.md).
+[`../ROADMAP/05-single-node-inference-optimization.md`](../ROADMAP/05-single-node-inference-optimization.md).
+Training/adaptation context:
+[`../ROADMAP/04-training-post-training-systems.md`](../ROADMAP/04-training-post-training-systems.md).
 
 ## 1. Concepts and deployment documentation
 
@@ -25,6 +27,11 @@ Companion map:
 6. [`ATOM.pdf`](ATOM.pdf) — serving co-design;
 7. [`QUAROT.pdf`](QUAROT.pdf) → [`SPINQUANT.pdf`](SPINQUANT.pdf) — random and learned rotations;
 8. [`QLLM-EVAL.pdf`](QLLM-EVAL.pdf) — evaluation across weights, activations and KV.
+
+Training/adaptation boundary:
+
+- [`QLORA.pdf`](QLORA.pdf) — 4-bit base-model adaptation with low-rank adapters; do not infer the
+  final serving format from the fine-tuning setup.
 
 KV-specific continuation:
 

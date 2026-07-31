@@ -5,6 +5,11 @@
 > **Format:** external English tutorials, design documents, blogs, papers, and exact GitHub source paths
 > **Not included:** an original inference-engine tutorial or a calendar
 
+[Roadmap](00-roadmap.md) ·
+[Decoding and test-time compute](06-decoding-test-time-compute.md) ·
+[Serving systems](08-kv-scheduling-serving.md) ·
+[Competency gates](COMPETENCY-GATES.md)
+
 ---
 
 ## Recommended Traversal
@@ -401,7 +406,7 @@ Until the single-node path is traceable, defer:
 
 ## Exit Gate
 
-Continue to [06-kv-scheduling-serving.md](06-kv-scheduling-serving.md) when:
+Continue to [08-kv-scheduling-serving.md](08-kv-scheduling-serving.md) when:
 
 - [ ] a request can be traced through API, scheduler, KV manager, runner, attention, sampler, and output;
 - [ ] prefill, decode, and mixed batches can be located in scheduler code;
@@ -413,3 +418,8 @@ Continue to [06-kv-scheduling-serving.md](06-kv-scheduling-serving.md) when:
 - [ ] performance claims include a pinned commit, controlled workload, and profiler evidence.
 
 The gate is a source-grounded request trace, not familiarity with every engine feature.
+
+---
+
+**Previous:** [`06-decoding-test-time-compute.md`](06-decoding-test-time-compute.md) ·
+**Next:** [`08-kv-scheduling-serving.md`](08-kv-scheduling-serving.md)

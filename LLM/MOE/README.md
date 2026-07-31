@@ -3,7 +3,7 @@
 Architecture, routing, expert compute, communication, placement and online serving.
 
 Complete tutorial and research map:
-[`../ROADMAP/07-distributed-inference-moe.md`](../ROADMAP/07-distributed-inference-moe.md).
+[`../ROADMAP/09-distributed-inference-moe.md`](../ROADMAP/09-distributed-inference-moe.md).
 
 ## 1. Architecture and routing foundations
 

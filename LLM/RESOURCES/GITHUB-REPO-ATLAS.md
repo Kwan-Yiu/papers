@@ -244,19 +244,29 @@ default.
 
 ---
 
-## 9. Speculative and alternative decoding
+## 9. Decoding, structured generation, and test-time compute
 
 | Pri | Local | Repository | Method | Read for |
 |---|---|---|---|---|
 | A | L | [vllm-project/speculators](https://github.com/vllm-project/speculators) | unified speculation library | building/evaluating speculators for vLLM |
 | A | L | [SafeAILab/EAGLE](https://github.com/SafeAILab/EAGLE) | EAGLE 1/2/3 | feature-level drafting |
+| A | L | [mlc-ai/xgrammar](https://github.com/mlc-ai/xgrammar) | structured generation | grammar compilation, token masks and engine integration |
 | A | Link | [hemingkx/Spec-Bench](https://github.com/hemingkx/Spec-Bench) | benchmark | workload/acceptance comparison |
-| B | Link | [FasterDecoding/Medusa](https://github.com/FasterDecoding/Medusa) | multiple heads | Medusa training/inference artifact |
-| B | Link | [hao-ai-lab/LookaheadDecoding](https://github.com/hao-ai-lab/LookaheadDecoding) | lookahead | draft-model-free decoding |
+| B | L | [FasterDecoding/Medusa](https://github.com/FasterDecoding/Medusa) | multiple heads | Medusa training/inference artifact |
+| B | L | [facebookresearch/LayerSkip](https://github.com/facebookresearch/LayerSkip) | self-speculative | early-exit training and shared-model drafting |
+| B | L | [apple/ml-recurrent-drafter](https://github.com/apple/ml-recurrent-drafter) | recurrent drafter | ReDrafter, tree attention and correctness |
+| B | L | [hao-ai-lab/LookaheadDecoding](https://github.com/hao-ai-lab/LookaheadDecoding) | lookahead | Jacobi/draft-model-free parallel decoding |
 | B | Link | [Infini-AI-Lab/TriForce](https://github.com/Infini-AI-Lab/TriForce) | hierarchical long-context speculation | sparse KV/draft hierarchy |
-| B | Link | [Infini-AI-Lab/Sequoia](https://github.com/Infini-AI-Lab/Sequoia) | tree-based speculation | robust tree construction/verification |
+| B | L | [Infini-AI-Lab/Sequoia](https://github.com/Infini-AI-Lab/Sequoia) | tree-based speculation | robust hardware-aware tree construction/verification |
+| B | L | [FasterDecoding/REST](https://github.com/FasterDecoding/REST) | retrieval speculation | datastore/trie proposals and tree verification |
+| B | L | [Infini-AI-Lab/MagicDec](https://github.com/Infini-AI-Lab/MagicDec) | long-context speculation | sparse-draft KV and batch/context break-even |
 | B | Link | [feifeibear/LLMSpeculativeSampling](https://github.com/feifeibear/LLMSpeculativeSampling) | minimal speculative sampling | compact correctness reference |
 | B | Link | [meta-pytorch/gpt-fast](https://github.com/meta-pytorch/gpt-fast) | small PyTorch inference | simple compilation/spec paths |
+| B | Link | [dottxt-ai/outlines](https://github.com/dottxt-ai/outlines) | structured outputs | readable regex/JSON/type-driven constraints |
+| B | Link | [guidance-ai/guidance](https://github.com/guidance-ai/guidance) | constrained programs | interleaved control, tools and generation |
+| B | Link | [simplescaling/s1](https://github.com/simplescaling/s1) | test-time scaling | budget forcing, training and evaluation artifacts |
+| B | Link | [princeton-nlp/tree-of-thought-llm](https://github.com/princeton-nlp/tree-of-thought-llm) | reasoning search | branching, evaluation and backtracking |
+| B | Link | [openreasoner/openr](https://github.com/openreasoner/openr) | reasoning framework | verifier/process-reward and search methods |
 | C | L | [NVIDIA/Model-Optimizer](https://github.com/NVIDIA/Model-Optimizer) | optimization framework | production-oriented speculative/model optimization integration |
 
 Thirty local papers are indexed in [`../SPEC/README.md`](../SPEC/README.md).
@@ -298,18 +308,22 @@ Thirty local papers are indexed in [`../SPEC/README.md`](../SPEC/README.md).
 
 ---
 
-## 12. Distributed training/post-training adjacent to inference
+## 12. Training and post-training systems
 
-These are not prerequisites for the inference core, but matter for rollout engines, architecture co-design and
-training-serving convergence.
+These repositories cover the Stage 04 data, pretraining, adaptation, preference-learning and
+rollout-system branches. Training remains especially relevant to inference for tokenizer/checkpoint
+compatibility, MTP/speculators, MoE, quantization and RL generation.
 
 | Pri | Local | Repository | Use |
 |---|---|---|---|
-| B | L | [NVIDIA/Megatron-LM](https://github.com/NVIDIA/Megatron-LM) | large-scale parallelism and MoE |
-| B | L | [deepspeedai/DeepSpeed](https://github.com/deepspeedai/DeepSpeed) | distributed optimization and inference |
-| B | Link | [verl-project/verl](https://github.com/verl-project/verl) | RL/post-training rollout architecture |
+| A | L | [huggingface/datatrove](https://github.com/huggingface/datatrove) | extraction, filtering, deduplication, tokenization and distributed data pipelines |
+| A | L | [allenai/OLMo-core](https://github.com/allenai/OLMo-core) | open pretraining stack, official configs and checkpoints |
+| A | L | [NVIDIA/Megatron-LM](https://github.com/NVIDIA/Megatron-LM) | large-scale parallelism, checkpoints and MoE |
+| A | L | [deepspeedai/DeepSpeed](https://github.com/deepspeedai/DeepSpeed) | ZeRO, distributed optimization and inference |
+| A | L | [allenai/open-instruct](https://github.com/allenai/open-instruct) | SFT, reward models, DPO, GRPO and reproducible post-training |
+| A | L | [huggingface/trl](https://github.com/huggingface/trl) | maintained SFT, reward, DPO-family, PPO and GRPO trainers |
+| A | L | [verl-project/verl](https://github.com/verl-project/verl) | RL/post-training rollout architecture and inference integration |
 | B | Link | [OpenRLHF/OpenRLHF](https://github.com/OpenRLHF/OpenRLHF) | scalable agentic RL and vLLM/Ray integration |
-| B | Link | [huggingface/trl](https://github.com/huggingface/trl) | post-training algorithms |
 | B | Link | [hpcaitech/ColossalAI](https://github.com/hpcaitech/ColossalAI) | distributed model scaling |
 | C | Link | [pytorch/pytorch](https://github.com/pytorch/pytorch) | compiler, distributed and runtime source of truth |
 

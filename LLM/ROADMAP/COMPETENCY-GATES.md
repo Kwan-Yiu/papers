@@ -1,15 +1,13 @@
 # Competency Gates
 
-> **Role:** verify the numbered roadmap layers with concrete evidence
+> **Role:** verify that the numbered roadmap layers can be explained, traced and evaluated
 >
-> **Rule:** a layer is complete only when its exit gate can be defended
->
-> **Non-goal:** this document is not a calendar, schedule, or second teaching outline
+> **Non-goal:** this is not a calendar, tutorial, exercise plan or mandatory project list
 
 [Roadmap index](README.md) ·
 [Overview](00-roadmap.md) ·
 [Foundation entry](01-ai-ml-foundations.md) ·
-[Research map](09-bottleneck-research.md)
+[Research map](11-bottleneck-research.md)
 
 ---
 
@@ -20,27 +18,31 @@ flowchart TD
     G1["01 · AI/ML + PyTorch"]
     G2["02 · Transformer + HF"]
     G3["03 · Modern architecture"]
-    G4["04 · GPU + compiler + kernels"]
-    G5["05 · Single-node engine"]
-    A["06A · KV/state"]
-    B["06B · Scheduling/serving"]
-    C["06C · Compression/decoding"]
-    G7["07 · Distributed + MoE"]
-    G8["08 · Production reliability"]
-    G9["09 · Research claim"]
+    G4["04 · Training + post-training"]
+    G5["05 · Compression + kernels + compilers"]
+    G6["06 · Decoding + test-time compute"]
+    G7["07 · Single-node engine"]
+    A["08A · KV/state"]
+    B["08B · Scheduling/serving"]
+    G9["09 · Distributed + MoE"]
+    G10["10 · Production reliability"]
+    G11["11 · Research claim"]
 
-    G1 --> G2 --> G3 --> G4 --> G5
-    G5 --> A
-    G5 --> B
-    G5 --> C
-    A --> G7
-    B --> G7
-    C --> G7
-    G7 --> G8 --> G9
+    G1 --> G2 --> G3
+    G3 --> G4 --> G5
+    G3 --> G5
+    G4 --> G6
+    G5 --> G6 --> G7
+    G7 --> A
+    G7 --> B
+    A --> G9
+    B --> G9
+    G9 --> G10 --> G11
 ```
 
-Use the first gate whose exit criterion cannot be defended. Select only the 06 specialization
-branches relevant to the intended research direction.
+Use the first gate whose criteria cannot already be defended. Evidence can be a derivation, a
+source trace, an existing artifact, a profiler/benchmark record or a published reproduction; this
+document does not require creating a new experiment for every topic.
 
 ---
 
@@ -48,29 +50,16 @@ branches relevant to the intended research direction.
 
 **Reference:** [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md)
 
-### Required evidence
-
-- linear-layer and matrix-multiplication shape derivation;
-- manual softmax and cross-entropy calculation;
-- small classifier with training and validation metrics;
-- MLP with a non-linearity and normalization/residual component;
-- tiny next-token model;
-- gradient, parameter, activation, and model-state inspection;
-- saved and correctly reloaded `state_dict`;
-- reproducibility record.
-
-### Exit gate
-
 You can:
 
-1. distinguish AI, machine learning, deep learning, and language modeling;
-2. derive tensor shapes through linear layers;
-3. explain logits, softmax, cross entropy, and maximum likelihood;
-4. explain forward, backward, gradients, and optimizer updates;
-5. distinguish parameters, activations, gradients, optimizer state, and inference state;
-6. write PyTorch training and evaluation loops;
-7. inspect shape, dtype, device, stride, and autograd state;
-8. separate model-quality metrics from systems metrics.
+- derive matrix/linear-layer shapes and explain broadcasting;
+- calculate softmax, cross entropy and maximum likelihood on a small example;
+- explain forward, backward, gradients and optimizer updates;
+- distinguish parameters, activations, gradients, optimizer state and inference state;
+- distinguish training, validation, generalization and inference;
+- inspect shape, dtype, device, stride and autograd state in PyTorch;
+- explain save/load state and reproducibility controls;
+- separate model-quality metrics from systems metrics.
 
 ---
 
@@ -78,30 +67,17 @@ You can:
 
 **Reference:** [`02-transformer-foundations.md`](02-transformer-foundations.md)
 
-### Required evidence
-
-- two-token, one-head causal-attention calculation;
-- minimal decoder block with shape assertions;
-- minimal autoregressive language model;
-- cached and uncached generation with matching logits;
-- parameter/FLOP/KV ledger;
-- Hugging Face tokenizer/config/model/generation inspection;
-- exact source paths for attention, FFN, normalization, RoPE, and cache update.
-
-### Exit gate
-
 Given a model configuration, you can:
 
-```text
-derive Q/K/V shapes
-reconstruct one decoder block
-explain causal masking
-calculate parameter and KV bytes
-distinguish training, prefill, and decode
-implement autoregressive generation
-explain sampling/stopping
-trace AutoModelForCausalLM to model-family source
-```
+- derive Q/K/V, attention-score and output shapes;
+- explain causal masking, position encoding, FFN, residual and normalization;
+- explain tokenization, special tokens, chat templates and next-token likelihood;
+- distinguish encoder-only, encoder-decoder and decoder-only execution;
+- distinguish training, prefill and decode;
+- calculate parameter, activation and KV/state bytes;
+- explain cached and uncached autoregressive generation;
+- explain ordinary sampling and stopping;
+- trace `AutoModelForCausalLM`, configuration, cache and generation to model-family source.
 
 `model.generate()` is no longer a black box.
 
@@ -111,310 +87,291 @@ trace AutoModelForCausalLM to model-family source
 
 **Reference:** [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md)
 
-### Required evidence
+For an unfamiliar configuration, you can identify and cost:
 
-Build an architecture delta matrix for:
+- MHA, GQA, MQA and MLA;
+- RoPE/ALiBi/context-extension choices;
+- per-layer KV versus CLA/MLKV/YOCO-style sharing;
+- full, sliding-window, sparse, retrieval and hybrid attention;
+- softmax attention versus linear/recurrent/SSM state;
+- dense FFN versus MoE and conditional depth;
+- MTP/speculative heads and early-exit support;
+- autoregressive versus iterative/diffusion generation;
+- text-only versus multimodal encoder/projector/token streams;
+- model-defined numerical precision and quantization metadata.
 
-- MHA → GQA → MQA;
-- conventional attention → MLA;
-- per-layer KV → CLA/MLKV/YOCO-style cross-layer sharing;
-- full attention → sliding-window/sparse/retrieval attention;
-- softmax attention → linear/recurrent/SSM/hybrid state;
-- dense FFN → sparse MoE;
-- attention → recurrent/SSM/hybrid state;
-- one-token head → MTP/speculative-friendly heads;
-- fixed depth → dynamic depth;
-- autoregressive → iterative/diffusion generation;
-- BF16/FP16 → FP8/INT8/INT4-style execution.
-
-For each delta, record:
+For each delta you can state:
 
 ```text
 semantic change
-weight capacity
-persistent state
+weight and persistent-state capacity
 bytes and FLOPs per token
-kernel/compiler requirements
+kernel/compiler requirement
 parallelism and communication
-prefill/decode behavior
-quality constraint
+prefill/decode/encode behavior
+quality and compatibility constraint
 ```
-
-### Exit gate
-
-Given an unfamiliar configuration, you can predict dominant serving costs and identify the model,
-compiler, kernel, and engine paths needed to verify the prediction.
 
 ---
 
-## Gate 04 — Single-Node Inference Optimization
+## Gate 04 — Training and Post-Training Systems
 
-**Reference:** [`04-single-node-inference-optimization.md`](04-single-node-inference-optimization.md)
+**Reference:** [`04-training-post-training-systems.md`](04-training-post-training-systems.md)
 
-### Required evidence
+You can distinguish and trace:
 
-- source-grounded parameter, KV/state, workspace, FLOP, and bandwidth prediction;
-- predicted-versus-measured memory reconciliation;
-- optimization classification by semantic, architecture, representation, kernel, runtime, and
-  scheduling layer;
-- MHA/GQA/MQA/MLA/cross-layer-sharing comparison;
-- full/sliding/sparse/linear/recurrent/hybrid attention comparison;
-- weight-only, weight-activation, KV, attention, and MoE quantization comparison;
-- calibration/outlier/scale/packing/dequantization/kernel inspection;
-- unstructured, N:M, and structured pruning with deployed-kernel inspection;
-- KV retention/compression/eviction comparison with quality and layout evidence;
-- Roofline-style operator cost sheet;
-- annotated PyTorch/Nsight trace;
-- one modified Triton or CUDA kernel;
-- correctness and multi-shape measurements;
-- one negative/regression case;
-- eager-versus-compiled comparison;
-- graph-break/recompilation case;
-- generated code or compiler IR inspection;
-- backend-specific assumption list.
+- acquisition, extraction, filtering, deduplication, decontamination and data mixture;
+- tokenizer training, sequence fertility, packing, boundaries and loss masks;
+- causal/masked/span/FIM/multimodal objectives;
+- scaling-law assumptions and compute/data constrained regimes;
+- parameters, gradients, optimizer state, activations and communication buffers;
+- DDP, FSDP/ZeRO, TP, PP, CP/SP and EP;
+- mixed precision, activation checkpointing and distributed checkpoint/resume;
+- continued pretraining, SFT, LoRA/QLoRA and adapter merge/runtime serving;
+- preference data, reward models and outcome/process feedback;
+- DPO-family offline objectives versus PPO/GRPO-family online RL;
+- rollout generation, reward evaluation, weight synchronization and stale-policy behavior;
+- how tokenizer, architecture, precision, MTP/MoE and checkpoint choices constrain inference.
 
-### Exit gate
-
-Before changing code, you can predict whether a target is limited by:
+For RL/reasoning pipelines, you can trace:
 
 ```text
-weight or KV capacity
-arithmetic throughput
-memory traffic
-launch/dispatch
-compiler specialization
-synchronization
-communication
-insufficient parallelism
+prompt/environment
+→ rollout engine
+→ tool/environment interaction
+→ reward/verifier
+→ trajectory statistics
+→ policy update
+→ weight publication
 ```
-
-You can then select an optimization at the correct layer, trace it through a production engine and
-backend, and identify profiler, quality, and serving evidence that would falsify the prediction.
 
 ---
 
-## Gate 05 — Single-Node Inference Engine
+## Gate 05 — Single-Node Inference Optimization
 
-**Reference:** [`05-single-node-inference-engine.md`](05-single-node-inference-engine.md)
+**Reference:** [`05-single-node-inference-optimization.md`](05-single-node-inference-optimization.md)
 
-### Required evidence
+Before accepting an optimization claim, you can:
 
-- one current vLLM or SGLang baseline;
-- exact environment and workload contract;
-- request execution-path note with source locations;
-- continuous scheduler implementation or simulator;
-- block-based KV allocator with correctness tests;
-- preemption/resumption path;
-- prefill/decode profiler comparison;
-- saturation and P50/P95/P99 metrics;
-- CPU-control and GPU-execution timeline.
+- derive parameter, activation, KV/state, workspace, FLOP and byte costs;
+- reconcile formula, allocator and profiler memory;
+- distinguish semantic/model, representation, algorithm, kernel, compiler and runtime changes;
+- distinguish weight, activation, KV, attention and expert quantization;
+- compare PTQ/QAT, scale granularity, calibration, outliers, packing and dequantization;
+- distinguish unstructured, N:M and structured sparsity from deployed sparse kernels;
+- classify KV quantization, selection, eviction, compression, retrieval, tiering and offload;
+- distinguish GQA/MQA, MLA and cross-layer sharing;
+- distinguish sparse/linear/recurrent attention from exact FlashAttention-style IO optimization;
+- locate CUDA/Triton/CUTLASS/CuTe kernels and compiler-generated code/IR;
+- identify eager/compiled/graph-captured paths, specialization and fallback;
+- state supported hardware, dtype, layout and shape;
+- state quality/correctness, end-to-end impact and regression/break-even region.
 
-### Required request trace
+---
+
+## Gate 06 — Decoding, Speculative Execution, and Test-Time Compute
+
+**Reference:** [`06-decoding-test-time-compute.md`](06-decoding-test-time-compute.md)
+
+You can distinguish:
+
+- greedy, stochastic sampling, beam/contrastive search and best-of-N;
+- logits processing from model-forward execution;
+- constrained/structured generation from ordinary sampling;
+- exact speculative decoding from approximate accelerated decoding;
+- independent draft, self-speculative, MTP/Medusa, EAGLE, retrieval/N-gram, tree, long-context and
+  diffusion/block drafters;
+- lookahead/Jacobi parallel decoding from classic draft-target speculation;
+- a diffusion LM target from a diffusion speculative drafter;
+- latency-reducing speculation from quality-seeking test-time compute;
+- reasoning search from agent/tool multi-call execution.
+
+You can trace:
 
 ```text
-API
-→ tokenizer
+proposal
+→ target verification
+→ acceptance / residual sampling
+→ provisional KV/state commit or rollback
+→ scheduler and batch update
+```
+
+You can also explain:
+
+- draft/target placement and memory;
+- verification masks/kernels and tree/ragged shapes;
+- tokenizer/vocabulary compatibility;
+- grammar state under speculation;
+- batching, CUDA Graph, TP, MoE, quantization and prefix-cache interaction;
+- distribution-parity or greedy-parity validation;
+- why acceptance rate alone does not predict TTFT/TPOT/E2E/goodput;
+- how to report break-even across workload, batch, context and hardware;
+- quality–latency–cost metrics for test-time reasoning.
+
+---
+
+## Gate 07 — Single-Node Inference Engine
+
+**Reference:** [`07-single-node-inference-engine.md`](07-single-node-inference-engine.md)
+
+You can trace one request through:
+
+```text
+API/frontend
+→ tokenizer/input processor
 → queue/admission
 → scheduler
 → batch builder
 → model runner
-→ attention backend
-→ KV manager
-→ logits/sampling
+→ attention/backend
+→ KV/state manager
+→ logits/structured/speculative path
+→ sampling
 → detokenize/stream
 ```
 
-### Exit gate
+You can identify:
 
-You can explain every major time, memory, state, and synchronization cost for one request on one
-node, including CPU control-plane overhead and GPU idle gaps.
-
----
-
-## Gate 06A — KV and Inference-State Systems
-
-**Reference:** [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
-
-### Required evidence
-
-- KV capacity under MHA/GQA/MQA/MLA and cross-layer sharing;
-- contiguous versus paged allocation comparison;
-- fragmentation and block-size sensitivity;
-- prefix reuse, admission, eviction, and prefetch policy;
-- HBM/peer/host/storage/remote tier model;
-- transfer-versus-recompute boundary;
-- migration, preemption, and failure-recovery behavior.
-
-### Exit gate
-
-You can select a state policy from locality, context distribution, bandwidth, capacity, correctness,
-failure model, and SLO—not from cache hit rate alone.
+- request/sequence state transitions;
+- continuous batching and chunked prefill;
+- paged/block KV allocation and release;
+- preemption, recomputation, swap and resume;
+- eager and CUDA Graph execution;
+- CPU control-plane overhead and GPU idle gaps;
+- one readable engine path and the corresponding production path;
+- correctness and workload requirements of any reported performance result.
 
 ---
 
-## Gate 06B — Online Serving and Scheduling
+## Gate 08A — KV and Inference-State Systems
 
-**Reference:** [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
+**Reference:** [`08-kv-scheduling-serving.md`](08-kv-scheduling-serving.md)
 
-### Required evidence
+You can:
 
-- open-loop and closed-loop workloads;
-- FCFS, priority, fairness, and deadline policy comparison;
-- head-of-line-blocking analysis;
-- chunked-prefill/decode interference;
-- admission, backpressure, and load-shedding behavior;
-- P50/P95/P99 TTFT, ITL, E2E, goodput, fairness, and starvation;
-- simulator-versus-real-system calibration.
-
-### Exit gate
-
-You can identify saturation, explain tail-latency collapse, and show whether a policy improves SLO
-goodput without shifting cost to another request class.
+- calculate KV/state under MHA/GQA/MQA/MLA and cross-layer sharing;
+- compare contiguous, paged and virtual allocation;
+- explain fragmentation and block-size effects;
+- distinguish prefix reuse from model-semantic KV reduction;
+- define admission, retention, eviction, prefetch and migration;
+- model HBM, peer, host, storage and remote tiers;
+- locate the transfer-versus-recompute boundary;
+- reason about provisional speculative state and multi-branch reasoning state;
+- preserve correctness through preemption, migration and failure.
 
 ---
 
-## Gate 06C — Compression and Decoding
+## Gate 08B — Online Serving and Scheduling
 
-**References:** [`../QUANT/README.md`](../QUANT/README.md),
-[`../SPEC/README.md`](../SPEC/README.md), and
-[`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
+**Reference:** [`08-kv-scheduling-serving.md`](08-kv-scheduling-serving.md)
 
-### Required evidence
+You can:
 
-- weight-only, weight-activation, KV, attention, and MoE quantization comparison;
-- pruning/sparsity/model-size reduction with actual backend support;
-- calibration/outlier/scale/dequantization/kernel inspection;
-- token/head/layer retention, eviction and compression comparison;
-- speculative draft/verification/acceptance/rollback model;
-- model/head/feature/n-gram/prompt proposal comparison;
-- quality, memory, latency, throughput, and batch interaction;
-- explicit break-even and regression regions.
-
-### Exit gate
-
-You can state the quality contract and exact workload/backend region where a compression or decoding
-mechanism helps or regresses.
+- distinguish open-loop and closed-loop load generation;
+- define TTFT, TPOT/ITL, E2E, throughput, goodput and fairness;
+- explain continuous batching, chunked prefill and head-of-line blocking;
+- compare FCFS, priority, deadline and fair policies;
+- define admission, backpressure and load shedding;
+- schedule ordinary, structured, speculative, multimodal and reasoning requests;
+- explain encode/prefill/decode and prefill/decode disaggregation;
+- reason about prefix/cache-aware routing and multi-model/adapter placement;
+- identify saturation and tail-latency collapse;
+- interpret simulator results only after calibration to a real engine.
 
 ---
 
-## Gate 07 — Distributed Inference and MoE
+## Gate 09 — Distributed Inference and MoE
 
-**Reference:** [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md)
+**Reference:** [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md)
 
-### Required evidence
+For dense/distributed inference, you can:
 
-Dense/distributed:
+- derive per-rank memory and communication for DP/replicas, TP, PP and CP/SP;
+- map collective and point-to-point traffic to topology;
+- distinguish PCIe, NVLink/NVSwitch and inter-node fabric regimes;
+- explain communication/compute overlap and decode-specific small-message costs;
+- reason about prefill/decode, remote KV and draft/target disaggregation;
+- select parallelism from model, workload, topology and SLO.
 
-- memory and communication derivation for DP, TP, PP, CP/SP;
-- collective and point-to-point cost model;
-- topology diagram;
-- per-rank memory ledger;
-- parallelism calculator;
-- disaggregation break-even analysis;
-- measured-versus-predicted comparison.
+For MoE, you can:
 
-MoE:
-
-- routing and tokens-per-expert trace;
-- router → dispatch → grouped GEMM → combine trace;
-- padded/grouped/sparse/fused expert-kernel comparison;
-- EP communication and topology model;
-- skew, hot expert, max-rank tail, placement, and replication analysis;
-- separate prefill and decode behavior.
-
-### Exit gate
-
-Given a model, workload, accelerator topology, and SLO, you can choose and defend parallelism and
-placement. For MoE, you can explain why sparse active FLOPs do not imply sparse storage, memory
-traffic, communication, or latency.
+- trace router → permutation/dispatch → grouped/fused GEMM → combine;
+- distinguish token-choice, expert-choice, shared and fine-grained experts;
+- explain capacity, dropping, auxiliary balance and auxiliary-loss-free routing;
+- model EP all-to-all payload and synchronization;
+- identify skew, hot experts, max-rank tail and topology effects;
+- compare placement, replication, caching/offload and disaggregated experts;
+- separate prefill and decode behavior;
+- explain why sparse active FLOPs do not imply sparse storage, traffic or latency.
 
 ---
 
-## Gate 08 — Production Reliability and Operations
+## Gate 10 — Production Platform and Reliability
 
-**Reference:** [`08-production-reliability.md`](08-production-reliability.md)
+**Reference:** [`10-production-reliability.md`](10-production-reliability.md)
 
-### Required evidence
+You can explain:
 
-- service/SLO contract;
-- request and control-plane map;
-- metrics, trace, and log schema;
-- overload curve;
-- admission/backpressure behavior;
-- cold-start decomposition;
-- autoscaling response;
-- failure matrix;
-- failure/recovery trace;
-- cancellation/retry correctness;
-- tenant/state-isolation checklist;
-- cost and capacity model.
-
-### Exit gate
-
-You can explain service behavior under overload, cold start, partial failure, retry, and multi-tenant
-contention—and show that recovery preserves the declared correctness and SLO contract.
+- API gateway, authentication, quotas, routing and admission;
+- model registry, artifact lineage, checkpoint conversion and supply-chain controls;
+- loading, cold start, warm pools, multi-model placement and adapter lifecycle;
+- control plane versus data plane;
+- metrics, traces, logs and correctness canaries;
+- overload, backpressure, degradation and autoscaling;
+- worker/GPU/node/network/cache failure detection and recovery;
+- cancellation, retry, replay, idempotency and state consistency;
+- tenant isolation, privacy and security;
+- safe rollout/rollback and version compatibility;
+- capacity, cost and energy at an explicit SLO.
 
 ---
 
-## Gate 09 — Bottleneck-Driven Research
+## Gate 11 — Bottleneck-Driven Research
 
-**References:** [`09-bottleneck-research.md`](09-bottleneck-research.md) and
-[`10-research-projects.md`](10-research-projects.md)
+**Reference:** [`11-bottleneck-research.md`](11-bottleneck-research.md)
 
-### Required sequence
-
-1. Define workload, hardware/topology, software, quality constraint, and SLO.
-2. Identify a dominant resource or queue using measurement.
-3. Reproduce the strongest relevant baseline.
-4. State a falsifiable hypothesis.
-5. Build a mechanism that attacks the measured bottleneck.
-6. Evaluate baselines, ablations, stress cases, and negative cases.
-7. Identify the break-even boundary.
-8. Package commands, configs, raw results, and analysis.
-
-### Required evidence
+A defensible research claim contains:
 
 ```text
 problem statement and non-goals
-workload contract
-bottleneck evidence
+workload / model / hardware / topology / software contract
+quality, correctness and SLO contract
+measured bottleneck evidence
 cost model
 mechanism and invariants
 strong baselines
-ablations
+ablations or causal isolation
 stress and negative cases
-quality/correctness
-limitations and boundary
-reproduction instructions
+break-even boundary
+limitations
+reproduction instructions and raw evidence
 ```
 
-### Exit gate
-
-An independent reader can reproduce the main result and distinguish:
+An independent reader can distinguish:
 
 - observation from assumption;
-- systems improvement from quality change;
-- average speedup from SLO goodput;
+- algorithm/model change from systems optimization;
+- quality change from performance change;
+- average speedup from tail latency and SLO goodput;
+- isolated kernel improvement from end-to-end service impact;
 - mechanism benefit from workload selection;
 - measured boundary from claimed generality.
 
 ---
 
-## Hardware-Aware Validation
+## Hardware-Aware Evidence
 
 | Available environment | Useful evidence |
 |---|---|
-| no GPU | math, cost models, source traces, schedulers, calibrated simulation |
-| one GPU | kernels, compilation, KV allocation, batching, single-node serving |
-| temporary remote GPU | pre-validated high-information comparisons |
-| multi-GPU node | collectives, TP/EP, topology, placement, overlap |
-| multi-node cluster | disaggregation, routing, failure, cross-node tail behavior |
+| no accelerator | derivations, cost models, source traces, correctness reasoning and calibrated simulation |
+| one GPU | kernels, compilation, KV allocation, batching and single-node serving |
+| temporary remote GPU | pre-defined high-information comparisons |
+| multi-GPU node | collectives, TP/EP, topology, placement and overlap |
+| multi-node cluster | disaggregation, routing, failure and cross-node tail behavior |
 
-Do not treat checkpoint downloads, repository count, or isolated peak throughput as competency
-evidence. Prefer the smallest model and environment that expose the mechanism.
+Repository count, checkpoint downloads and isolated peak throughput are not competency evidence.
 
 ---
 
 **Roadmap overview:** [`00-roadmap.md`](00-roadmap.md) ·
-**Foundation entry:** [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md) ·
-**Project catalog:** [`10-research-projects.md`](10-research-projects.md)
+**Foundation entry:** [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md)

@@ -4,7 +4,7 @@ External sources for exact IO-aware attention, sparse/local attention, and linea
 alternatives.
 
 Companion map:
-[`../ROADMAP/04-single-node-inference-optimization.md`](../ROADMAP/04-single-node-inference-optimization.md).
+[`../ROADMAP/05-single-node-inference-optimization.md`](../ROADMAP/05-single-node-inference-optimization.md).
 
 ## 1. Exact softmax attention kernels
 

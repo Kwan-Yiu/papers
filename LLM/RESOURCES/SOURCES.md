@@ -12,6 +12,39 @@ problem snapshot.
 | [`FOUNDATION/LLAMA2.pdf`](../FOUNDATION/LLAMA2.pdf) | Llama 2: Open Foundation and Fine-Tuned Chat Models | [arXiv 2307.09288](https://arxiv.org/abs/2307.09288) | Core architecture |
 | [`FOUNDATION/DEEPSEEKR1.pdf`](../FOUNDATION/DEEPSEEKR1.pdf) | DeepSeek-R1 | [arXiv 2501.12948](https://arxiv.org/abs/2501.12948) | Reasoning workload |
 
+## Training and Post-Training
+
+| File | Title | Source | Use |
+|---|---|---|---|
+| [`TRAINING/SCALING-LAWS.pdf`](../TRAINING/SCALING-LAWS.pdf) | Scaling Laws for Neural Language Models | [arXiv 2001.08361](https://arxiv.org/abs/2001.08361) | Scaling foundation |
+| [`TRAINING/DEDUP.pdf`](../TRAINING/DEDUP.pdf) | Deduplicating Training Data Makes Language Models Better | [arXiv 2107.06499](https://arxiv.org/abs/2107.06499) | Data quality |
+| [`TRAINING/CHINCHILLA.pdf`](../TRAINING/CHINCHILLA.pdf) | Training Compute-Optimal Large Language Models | [arXiv 2203.15556](https://arxiv.org/abs/2203.15556) | Compute-optimal scaling |
+| [`TRAINING/DATA-CONSTRAINED.pdf`](../TRAINING/DATA-CONSTRAINED.pdf) | Scaling Data-Constrained Language Models | [arXiv 2305.16264](https://arxiv.org/abs/2305.16264) | Finite-data regimes |
+| [`TRAINING/DOREMI.pdf`](../TRAINING/DOREMI.pdf) | DoReMi | [arXiv 2305.10429](https://arxiv.org/abs/2305.10429) | Data-mixture optimization |
+| [`TRAINING/DATACOMP-LM.pdf`](../TRAINING/DATACOMP-LM.pdf) | DataComp-LM | [arXiv 2406.11794](https://arxiv.org/abs/2406.11794) | Data benchmark |
+| [`TRAINING/FINEWEB.pdf`](../TRAINING/FINEWEB.pdf) | The FineWeb Datasets | [arXiv 2406.17557](https://arxiv.org/abs/2406.17557) | Web-data pipeline |
+| [`TRAINING/GPIPE.pdf`](../TRAINING/GPIPE.pdf) | GPipe | [arXiv 1811.06965](https://arxiv.org/abs/1811.06965) | Pipeline parallelism |
+| [`TRAINING/PIPEDREAM.pdf`](../TRAINING/PIPEDREAM.pdf) | PipeDream | [arXiv 1806.03377](https://arxiv.org/abs/1806.03377) | Pipeline scheduling |
+| [`TRAINING/ZERO.pdf`](../TRAINING/ZERO.pdf) | ZeRO | [arXiv 1910.02054](https://arxiv.org/abs/1910.02054) | Sharded training state |
+| [`TRAINING/ZERO-OFFLOAD.pdf`](../TRAINING/ZERO-OFFLOAD.pdf) | ZeRO-Offload | [arXiv 2101.06840](https://arxiv.org/abs/2101.06840) | Optimizer offload |
+| [`TRAINING/MEGATRON-3D.pdf`](../TRAINING/MEGATRON-3D.pdf) | Efficient Large-Scale LM Training with Megatron-LM | [arXiv 2104.04473](https://arxiv.org/abs/2104.04473) | 3D parallelism |
+| [`TRAINING/FLAN.pdf`](../TRAINING/FLAN.pdf) | Finetuned Language Models Are Zero-Shot Learners | [arXiv 2109.01652](https://arxiv.org/abs/2109.01652) | Instruction tuning |
+| [`TRAINING/LORA.pdf`](../TRAINING/LORA.pdf) | LoRA | [arXiv 2106.09685](https://arxiv.org/abs/2106.09685) | Parameter-efficient adaptation |
+| [`TRAINING/SELF-INSTRUCT.pdf`](../TRAINING/SELF-INSTRUCT.pdf) | Self-Instruct | [arXiv 2212.10560](https://arxiv.org/abs/2212.10560) | Synthetic instruction data |
+| [`TRAINING/LIMA.pdf`](../TRAINING/LIMA.pdf) | LIMA | [arXiv 2305.11206](https://arxiv.org/abs/2305.11206) | Supervised alignment |
+| [`TRAINING/INSTRUCTGPT.pdf`](../TRAINING/INSTRUCTGPT.pdf) | Training Language Models to Follow Instructions with Human Feedback | [arXiv 2203.02155](https://arxiv.org/abs/2203.02155) | RLHF foundation |
+| [`TRAINING/CONSTITUTIONAL-AI.pdf`](../TRAINING/CONSTITUTIONAL-AI.pdf) | Constitutional AI | [arXiv 2212.08073](https://arxiv.org/abs/2212.08073) | AI feedback |
+| [`TRAINING/DPO.pdf`](../TRAINING/DPO.pdf) | Direct Preference Optimization | [arXiv 2305.18290](https://arxiv.org/abs/2305.18290) | Offline preference optimization |
+| [`TRAINING/VERIFY-STEP.pdf`](../TRAINING/VERIFY-STEP.pdf) | Let's Verify Step by Step | [arXiv 2305.20050](https://arxiv.org/abs/2305.20050) | Process reward models |
+| [`TRAINING/KTO.pdf`](../TRAINING/KTO.pdf) | KTO | [arXiv 2402.01306](https://arxiv.org/abs/2402.01306) | Preference optimization |
+| [`TRAINING/DEEPSEEKMATH.pdf`](../TRAINING/DEEPSEEKMATH.pdf) | DeepSeekMath / GRPO | [arXiv 2402.03300](https://arxiv.org/abs/2402.03300) | Reasoning RL |
+| [`TRAINING/ORPO.pdf`](../TRAINING/ORPO.pdf) | ORPO | [arXiv 2403.07691](https://arxiv.org/abs/2403.07691) | Preference optimization |
+| [`TRAINING/SIMPO.pdf`](../TRAINING/SIMPO.pdf) | SimPO | [arXiv 2405.14734](https://arxiv.org/abs/2405.14734) | Preference optimization |
+| [`TRAINING/DEEPSEEK-R1.pdf`](../TRAINING/DEEPSEEK-R1.pdf) | DeepSeek-R1 | [arXiv 2501.12948](https://arxiv.org/abs/2501.12948) | Reasoning RL and workload |
+
+Topic grouping and tutorial/repository links are in
+[`TRAINING/README.md`](../TRAINING/README.md).
+
 ## Performance foundations
 
 | File | Title | Source | Use |
@@ -110,6 +143,7 @@ problem snapshot.
 | [`QUANT/QUAROT.pdf`](../QUANT/QUAROT.pdf) | QuaRot | [arXiv 2404.00456](https://arxiv.org/abs/2404.00456) | Rotation direction |
 | [`QUANT/SPINQUANT.pdf`](../QUANT/SPINQUANT.pdf) | SpinQuant | [arXiv 2405.16406](https://arxiv.org/abs/2405.16406) | Learned-rotation direction |
 | [`QUANT/QLLM-EVAL.pdf`](../QUANT/QLLM-EVAL.pdf) | Evaluating Quantized Large Language Models | [arXiv 2402.18158](https://arxiv.org/abs/2402.18158) | Broad W/A/KV evaluation |
+| [`QUANT/QLORA.pdf`](../QUANT/QLORA.pdf) | QLoRA | [arXiv 2305.14314](https://arxiv.org/abs/2305.14314) | Low-bit adaptation boundary |
 
 ## Pruning and model compression
 
@@ -211,6 +245,19 @@ The 30 speculative-decoding sources are recorded separately in
 | `repos/duo-attention` | [mit-han-lab/duo-attention](https://github.com/mit-han-lab/duo-attention) | `fe93c314ae87` |
 | `repos/kvpress` | [NVIDIA/kvpress](https://github.com/NVIDIA/kvpress) | `fcd17d7013be` |
 | `repos/pythia-mlkv` | [zaydzuhri/pythia-mlkv](https://github.com/zaydzuhri/pythia-mlkv) | `c2ad06518e36` |
+| `repos/trl` | [huggingface/trl](https://github.com/huggingface/trl) | `922dc584664d` |
+| `repos/verl` | [verl-project/verl](https://github.com/verl-project/verl) | `aebd1f8a27d5` |
+| `repos/datatrove` | [huggingface/datatrove](https://github.com/huggingface/datatrove) | `5987417f9560` |
+| `repos/olmo-core` | [allenai/OLMo-core](https://github.com/allenai/OLMo-core) | `064b172e5169` |
+| `repos/open-instruct` | [allenai/open-instruct](https://github.com/allenai/open-instruct) | `b18cfc57c07c` |
+| `repos/medusa` | [FasterDecoding/Medusa](https://github.com/FasterDecoding/Medusa) | `e2a5d20c048a` |
+| `repos/layerskip` | [facebookresearch/LayerSkip](https://github.com/facebookresearch/LayerSkip) | `494752e5fbb0` |
+| `repos/recurrent-drafter` | [apple/ml-recurrent-drafter](https://github.com/apple/ml-recurrent-drafter) | `bd8586bb9bbf` |
+| `repos/lookahead-decoding` | [hao-ai-lab/LookaheadDecoding](https://github.com/hao-ai-lab/LookaheadDecoding) | `eed010da9c7b` |
+| `repos/sequoia` | [Infini-AI-Lab/Sequoia](https://github.com/Infini-AI-Lab/Sequoia) | `0ff3ff71475c` |
+| `repos/rest` | [FasterDecoding/REST](https://github.com/FasterDecoding/REST) | `154d0f0ae45d` |
+| `repos/magicdec` | [Infini-AI-Lab/MagicDec](https://github.com/Infini-AI-Lab/MagicDec) | `09cd671c01bc` |
+| `repos/xgrammar` | [mlc-ai/xgrammar](https://github.com/mlc-ai/xgrammar) | `3fb48bfd422a` |
 
-All 37 repositories were verified shallow and clean after clone. They occupy approximately 4.9 GiB total;
+All 50 repositories were verified shallow and clean after clone. They occupy approximately 5.4 GiB total;
 no model checkpoints or Python environments were downloaded.

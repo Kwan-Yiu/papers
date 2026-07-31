@@ -4,12 +4,13 @@
 >
 > Snapshot: 2026-07-31
 >
-> Companion: [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md), [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
+> Companion: [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md), [`08-kv-scheduling-serving.md`](08-kv-scheduling-serving.md)
 
 [Roadmap index](README.md) ·
 [Overview](00-roadmap.md) ·
 [Transformer foundations](02-transformer-foundations.md) ·
-[Single-node optimization](04-single-node-inference-optimization.md) ·
+[Training systems](04-training-post-training-systems.md) ·
+[Single-node optimization](05-single-node-inference-optimization.md) ·
 [Competency gates](COMPETENCY-GATES.md)
 
 ---
@@ -299,7 +300,7 @@ capacity_factor / drop policy
 ```
 
 The complete MoE systems path is in
-[`07-distributed-inference-moe.md`](07-distributed-inference-moe.md). The central warning is:
+[`09-distributed-inference-moe.md`](09-distributed-inference-moe.md). The central warning is:
 
 > Sparse FLOPs do not imply sparse memory, communication, or latency.
 
@@ -691,5 +692,6 @@ Local PDFs are in [`../ARCHITECTURE/`](../ARCHITECTURE/README.md). Key papers in
 ---
 
 **Previous:** [`02-transformer-foundations.md`](02-transformer-foundations.md) ·
-**Next:** [`04-single-node-inference-optimization.md`](04-single-node-inference-optimization.md) ·
-**MoE deep dive:** [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md)
+**Next:** [`04-training-post-training-systems.md`](04-training-post-training-systems.md) ·
+**Inference optimization:** [`05-single-node-inference-optimization.md`](05-single-node-inference-optimization.md) ·
+**MoE deep dive:** [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md)

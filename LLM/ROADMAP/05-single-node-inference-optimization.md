@@ -10,7 +10,9 @@
 
 [Roadmap](00-roadmap.md) ·
 [Modern architecture](03-modern-llm-architecture.md) ·
-[Single-node engine](05-single-node-inference-engine.md) ·
+[Training systems](04-training-post-training-systems.md) ·
+[Decoding](06-decoding-test-time-compute.md) ·
+[Single-node engine](07-single-node-inference-engine.md) ·
 [Repository atlas](../RESOURCES/GITHUB-REPO-ATLAS.md) ·
 [Source provenance](../RESOURCES/SOURCES.md)
 
@@ -676,6 +678,6 @@ This layer is complete when you can:
 
 ---
 
-**Previous:** [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md) ·
-**Next:** [`05-single-node-inference-engine.md`](05-single-node-inference-engine.md) ·
+**Previous:** [`04-training-post-training-systems.md`](04-training-post-training-systems.md) ·
+**Next:** [`06-decoding-test-time-compute.md`](06-decoding-test-time-compute.md) ·
 **Evaluation:** [`COMPETENCY-GATES.md`](COMPETENCY-GATES.md)

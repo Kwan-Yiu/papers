@@ -5,6 +5,11 @@
 > **Format:** external English books, official documentation, operational guides, and GitHub source/configuration paths
 > **Not included:** an original SRE or Kubernetes tutorial, a calendar, or a generic cloud certification path
 
+[Roadmap](00-roadmap.md) ·
+[Distributed inference and MoE](09-distributed-inference-moe.md) ·
+[Bottleneck research](11-bottleneck-research.md) ·
+[Competency gates](COMPETENCY-GATES.md)
+
 ---
 
 ## Scope
@@ -362,9 +367,67 @@ Required capacity artifact:
 
 ---
 
-## 7. Failure, Recovery, and Deployment
+## 7. Model Lifecycle, Multi-Model Placement, and Cold Start
 
-### 7.1 Reliability reading
+### 7.1 External reading path
+
+| Priority | Resource | Read for |
+|---|---|---|
+| Core | [Hugging Face Hub model repositories](https://huggingface.co/docs/hub/models-the-hub) | revisioned weights, config, tokenizer, model card and lineage |
+| Core | [safetensors](https://github.com/huggingface/safetensors) | bounded tensor serialization and safe loading boundary |
+| Core | [KServe model serving](https://kserve.github.io/website/latest/modelserving/) | inference-service lifecycle and runtime ownership |
+| Core | [Ray Serve model multiplexing](https://docs.ray.io/en/latest/serve/model-multiplexing.html) | multi-model/adaptor loading and replica routing |
+| Branch | [Triton model repository](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/model_repository.html) | version layout and load control |
+| Branch | [vLLM sleep mode](https://docs.vllm.ai/en/latest/features/sleep_mode/) | weight/KV memory release and reactivation |
+
+### 7.2 Lifecycle stages
+
+```text
+registry selection and immutable revision
+→ artifact download / local cache
+→ integrity and compatibility verification
+→ deserialization and host staging
+→ device weight load / reshard
+→ quantization or engine build when applicable
+→ kernel compilation / autotuning / CUDA Graph capture
+→ tokenizer and sampling/grammar initialization
+→ warmup and readiness
+→ traffic admission
+→ drain / sleep / unload / replace
+```
+
+Track time and memory for every stage rather than reporting one undifferentiated “cold start.”
+
+### 7.3 Multi-model and adapter placement
+
+- model/adapter popularity and memory residency;
+- load, eviction and prefetch policy;
+- base-weight, tokenizer, processor and adapter compatibility;
+- heterogeneous model sizes, precisions and TP degrees;
+- warm pools and queueing while loading;
+- route-to-resident versus load-on-demand trade-off;
+- model and prefix-cache locality interaction;
+- LoRA merge versus runtime multiplexing;
+- failed/partial load cleanup;
+- version-consistent streaming requests;
+- rollback when model, tokenizer, kernel or parser changes.
+
+### 7.4 Correctness and promotion
+
+- immutable model, tokenizer, template, generation-config and backend revisions;
+- offline golden/canary requests for logits, tokens, structured outputs and refusal behavior;
+- numerical tolerance versus exact-token contract;
+- sampling seed/RNG policy;
+- cache compatibility and invalidation across revisions;
+- shadow traffic and staged promotion;
+- SLO, quality and safety rollback triggers;
+- artifact and evaluation provenance.
+
+---
+
+## 8. Failure, Recovery, and Deployment
+
+### 8.1 Reliability reading
 
 | Priority | Resource | Read for |
 |---|---|---|
@@ -374,7 +437,7 @@ Required capacity artifact:
 | Core | [Kubernetes Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) | rollout and rollback |
 | Branch | [Dynamo fault-tolerance guide](https://docs.nvidia.com/dynamo/latest/user-guides/fault-tolerance) | inference-component recovery |
 
-### 7.2 Failure matrix
+### 8.2 Failure matrix
 
 For every row, trace detection, containment, recovery, state loss, client-visible result, and retry safety:
 
@@ -393,7 +456,7 @@ For every row, trace detection, containment, recovery, state loss, client-visibl
 | operator/control plane | desired/observed deployment state |
 | telemetry pipeline | detection and diagnosis |
 
-### 7.3 Deployment artifacts
+### 8.3 Deployment artifacts
 
 Required:
 
@@ -408,7 +471,7 @@ Required:
 
 ---
 
-## 8. Multi-Tenancy, Security, and Supply Chain
+## 9. Multi-Tenancy, Security, and Supply Chain
 
 | Priority | Resource | Read for |
 |---|---|---|
@@ -433,7 +496,7 @@ LLM-specific review:
 
 ---
 
-## 9. Cost, Energy, and Capacity References
+## 10. Cost, Energy, and Capacity References
 
 | Priority | Resource | Read for |
 |---|---|---|
@@ -456,7 +519,7 @@ Report:
 
 ---
 
-## 10. Required Evidence
+## 11. Required Evidence
 
 Produce:
 
@@ -477,7 +540,7 @@ Each artifact must point to the relevant external source and the implementation/
 
 ---
 
-## 11. Repository Index
+## 12. Repository Index
 
 | Repository | Role | Starting path | Status |
 |---|---|---|---|
@@ -494,7 +557,7 @@ Each artifact must point to the relevant external source and the implementation/
 
 ---
 
-## 12. What to Defer
+## 13. What to Defer
 
 Defer unless the chosen deployment needs it:
 
@@ -509,7 +572,7 @@ Defer unless the chosen deployment needs it:
 
 ## Exit Gate
 
-Continue to [09-bottleneck-research.md](09-bottleneck-research.md) when:
+Continue to [11-bottleneck-research.md](11-bottleneck-research.md) when:
 
 - [ ] the production request path and ownership boundaries are source-grounded;
 - [ ] TTFT, TPOT/inter-token, end-to-end latency, throughput, and goodput are defined for explicit request classes;
@@ -523,3 +586,8 @@ Continue to [09-bottleneck-research.md](09-bottleneck-research.md) when:
 - [ ] all platform behavior is tied to a pinned documentation/source revision.
 
 The gate is an auditable production model, not familiarity with every cloud-native tool.
+
+---
+
+**Previous:** [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md) ·
+**Next:** [`11-bottleneck-research.md`](11-bottleneck-research.md)

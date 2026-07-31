@@ -4,7 +4,7 @@ External sources for KV capacity, bandwidth, retention, representation, physical
 and disaggregation.
 
 Companion map:
-[`../ROADMAP/04-single-node-inference-optimization.md`](../ROADMAP/04-single-node-inference-optimization.md).
+[`../ROADMAP/05-single-node-inference-optimization.md`](../ROADMAP/05-single-node-inference-optimization.md).
 
 ## 1. Beginner bridge
 

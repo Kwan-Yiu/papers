@@ -3,12 +3,12 @@
 > **Role:** curated entry map plus a research taxonomy for dense and sparse distributed inference
 > **Target:** connect parallelism, topology, collectives, disaggregation, MoE routing, kernels, and online serving to papers and source code
 > **Format:** external English tutorials/documentation/repositories for foundations; paper-and-code taxonomy for MoE
-> **Read after:** [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
+> **Read after:** [`08-kv-scheduling-serving.md`](08-kv-scheduling-serving.md)
 
 [Roadmap index](README.md) ·
 [Overview](00-roadmap.md) ·
-[Serving systems](06-kv-scheduling-serving.md) ·
-[Production reliability](08-production-reliability.md) ·
+[Serving systems](08-kv-scheduling-serving.md) ·
+[Production reliability](10-production-reliability.md) ·
 [Competency gates](COMPETENCY-GATES.md)
 
 ---
@@ -1231,6 +1231,6 @@ You should be able to:
 
 ---
 
-**Previous:** [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md) ·
-**Next:** [`08-production-reliability.md`](08-production-reliability.md) ·
-**Research map:** [`09-bottleneck-research.md`](09-bottleneck-research.md)
+**Previous:** [`08-kv-scheduling-serving.md`](08-kv-scheduling-serving.md) ·
+**Next:** [`10-production-reliability.md`](10-production-reliability.md) ·
+**Research map:** [`11-bottleneck-research.md`](11-bottleneck-research.md)

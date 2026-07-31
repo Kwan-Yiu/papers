@@ -1,316 +1,403 @@
-# LLM Inference & AI Systems Research Roadmap
+# LLM and AI Systems Research Roadmap
 
-> **Target:** Database / systems researcher → LLM inference and AI systems researcher
+> **Target:** database / systems researcher → LLM inference and AI systems researcher
 >
-> **Primary question:** Where do computation, memory, communication, state, and queueing go?
+> **Center of gravity:** efficient, correct and reliable inference
 >
-> **Boundary:** text-LLM inference and serving systems, with training knowledge included only where required
+> **Coverage:** prerequisites, Transformer/LLM architecture, training and post-training systems,
+> model/runtime optimization, decoding, single-node engines, online serving, distributed inference,
+> MoE, production operations and bottleneck-driven research
+>
+> **Organization rule:** external English tutorials and official documentation → representative
+> papers → reference repositories → production source paths. These files are maps, not rewritten
+> tutorials. There is no calendar schedule.
 
 [Roadmap index](README.md) ·
-[AI/ML foundations](01-ai-ml-foundations.md) ·
-[Transformer foundations](02-transformer-foundations.md) ·
-[Competency gates](COMPETENCY-GATES.md)
+[Competency gates](COMPETENCY-GATES.md) ·
+[Repository atlas](../RESOURCES/GITHUB-REPO-ATLAS.md) ·
+[Paper provenance](../RESOURCES/SOURCES.md)
 
 ---
 
 ## 1. End Goal
 
-Build enough AI and model knowledge to reason correctly about execution, then go deep on the systems
-layers that determine inference efficiency and reliability:
+Build enough model knowledge to reason correctly about execution, then go deep on the systems layers
+that determine latency, throughput, capacity, reliability, quality and cost:
 
 ```text
-AI/ML and PyTorch
-→ Transformer mechanics
+AI/ML + PyTorch
+→ Transformer and generation mechanics
 → modern LLM architecture
-→ single-node inference optimization
+→ training and post-training systems
+→ compression, efficient attention, GPU kernels and compilers
+→ decoding, speculative execution and test-time compute
 → single-node inference engine
-→ KV cache, scheduling, and serving
+→ KV/state, scheduling and online serving
 → distributed inference and MoE
-→ production reliability
+→ production platform and reliability
 → bottleneck-driven systems research
 ```
 
-The goal is not to memorize model names, clone many repositories, or report isolated speedups. The
-goal is to formulate and validate quantitative claims about end-to-end inference systems.
-
----
-
-## 2. Complete Layer Map
-
-### Layer 01 — AI, ML, and PyTorch
-
-Learn:
-
-- tensors, shapes, dtypes, devices, and layouts;
-- matrix multiplication, probability, softmax, and cross entropy;
-- neural networks, activations, normalization, and residuals;
-- forward, backward, gradients, and optimizers;
-- training/evaluation/generalization;
-- PyTorch modules, autograd, data loading, and model state.
-
-Output: small trainable models and the ability to inspect loss, gradients, parameters, and runtime
-state.
-
-Read: [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md).
-
-### Layer 02 — Transformer and Hugging Face
-
-Learn:
-
-- tokenization, embeddings, and next-token likelihood;
-- Q/K/V, causal masking, multi-head attention;
-- RoPE, RMSNorm, SwiGLU, residual connections;
-- training, prefill, decode, autoregressive generation, and KV cache;
-- sampling and stopping;
-- Hugging Face tokenizer/config/model/generation/cache interfaces.
-
-Output: a minimal decoder and KV cache, plus an end-to-end inspection of a real
-`AutoModelForCausalLM`.
-
-Read: [`02-transformer-foundations.md`](02-transformer-foundations.md).
-
-### Layer 03 — Modern LLM Architecture
-
-Learn architecture deltas:
-
-- GPT/Llama/Qwen/DeepSeek families;
-- MHA/GQA/MQA/MLA;
-- full, sliding-window, sparse, and hybrid attention;
-- dense FFN and sparse MoE;
-- SSM/recurrent/hybrid state;
-- MTP and speculative-friendly heads;
-- dynamic depth and iterative/diffusion generation;
-- precision as an execution design.
-
-Output: an architecture delta matrix that predicts memory, FLOPs, kernels, state, and communication.
-
-Read: [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md).
-
-### Layer 04 — Single-Node Inference Optimization
-
-Learn:
-
-- source-grounded memory/FLOP/bandwidth models and profiler reconciliation;
-- weight, activation, KV, attention, and MoE quantization;
-- pruning, hardware-supported sparsity, structural reduction, and distillation boundaries;
-- KV selection, eviction, compression, tiering, and quality contracts;
-- MQA/GQA/MLA and cross-layer KV/attention sharing;
-- sliding-window, sparse, retrieval, linear, recurrent, SSM, and hybrid attention;
-- FlashAttention/FlashInfer and the boundary between algorithms and kernels;
-- GPU execution, CUDA, Triton, CUTLASS/CuTe, compilation, and CUDA Graphs;
-- production-engine configuration, backend dispatch, and fallback paths.
-
-Output: a source-grounded optimization comparison that connects predicted resource reduction,
-measured memory/runtime evidence, quality, backend support, and end-to-end serving behavior.
-
-Read: [`04-single-node-inference-optimization.md`](04-single-node-inference-optimization.md).
-
-### Layer 05 — Single-Node Inference Engine
-
-Learn:
-
-- request and sequence state;
-- continuous batching;
-- prefill/decode mixing;
-- token budgets;
-- paged/block KV allocation;
-- preemption and resumption;
-- model runner and attention backend;
-- logits, sampling, detokenization, and streaming;
-- CPU/GPU coordination.
-
-Output: minimal engine components and a source-level request path through vLLM or SGLang.
-
-Read: [`05-single-node-inference-engine.md`](05-single-node-inference-engine.md).
-
-### Layer 06 — KV Cache, Scheduling, and Serving
-
-Learn:
-
-- workload and arrival taxonomy;
-- TTFT, ITL, E2E, throughput, and goodput;
-- static/continuous batching and chunked prefill;
-- priority, fairness, deadlines, and preemption;
-- prefix caching, paging, tiering, compression, and state transfer;
-- quantization and speculative decoding;
-- serving-framework boundaries and evaluation matrices.
-
-Output: workload-aware state/scheduling decisions defended using tail latency, memory, and SLO
-goodput.
-
-Read: [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md).
-
-### Layer 07 — Distributed Inference and MoE
-
-Learn:
-
-- TP, PP, DP, CP/SP, and EP;
-- collectives and point-to-point transfer;
-- PCIe, NVLink/NVSwitch, InfiniBand/RoCE, and accelerator fabrics;
-- placement, topology, disaggregation, and overlap;
-- MoE routing, dispatch, grouped GEMM, all-to-all, skew, and expert placement;
-- cross-accelerator boundaries.
-
-Output: topology-aware parallelism/placement model and end-to-end MoE critical-path analysis.
-
-Read: [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md).
-
-### Layer 08 — Production Reliability and Operations
-
-Learn:
-
-- service contracts and SLOs;
-- control plane/data plane;
-- metrics, tracing, and structured logs;
-- routing, admission, backpressure, and autoscaling;
-- cold start;
-- worker/GPU/node/network/state failures;
-- replay, recovery, cancellation, and idempotency;
-- tenant isolation, artifact safety, cost, energy, and capacity.
-
-Output: overload, recovery, isolation, and cost evidence for a production-style service.
-
-Read: [`08-production-reliability.md`](08-production-reliability.md).
-
-### Layer 09 — Bottleneck-Driven Research
-
-Learn:
-
-- workload characterization;
-- resource and queue diagnosis;
-- falsifiable hypotheses;
-- strong baselines;
-- cost models;
-- mechanism design;
-- ablations, stress cases, negative cases, and break-even boundaries;
-- reproducible claim packaging.
-
-Output: a research claim whose evidence and limitations can be independently checked.
-
-Read: [`09-bottleneck-research.md`](09-bottleneck-research.md) and
-[`10-research-projects.md`](10-research-projects.md).
-
----
-
-## 3. Source-Grounded Inference Cost Model
-
-The roadmap does not define a new cost-model tutorial. Use the following external sources, then
-apply their models consistently across architecture, kernel, scheduler, and placement work.
-
-| Topic | Core external source | Exact reading target | Roadmap use |
-|---|---|---|---|
-| compute, bandwidth, capacity | [How To Scale Your Model — Rooflines](https://jax-ml.github.io/scaling-book/roofline/) | full chapter | FLOPs, bytes, arithmetic intensity, lower bounds |
-| GPU and network topology | [How To Scale Your Model — GPUs](https://jax-ml.github.io/scaling-book/gpus/) | GPU hierarchy, collectives, LLM rooflines | chip/node/cluster cost |
-| Transformer FLOPs and shapes | [How To Scale Your Model — Transformer Math](https://jax-ml.github.io/scaling-book/transformers/) | forward-pass and sharding calculations | parameter and operator ledger |
-| inference prefill/decode | [Efficiently Scaling Transformer Inference](../PERF/TRANSFORMERINFER.pdf) | analytical model and evaluation | phase-specific compute/memory behavior |
-| framework overhead and fusion | [Making Deep Learning Go Brrrr](https://horace.io/brrr_intro.html) | overhead, fusion, memory, compilation | eager/compiler/kernel boundaries |
-| memory measurement | [PyTorch — Understanding CUDA Memory Usage](https://docs.pytorch.org/docs/main/torch_cuda_memory) | snapshots, allocator state and visibility boundary | formula-versus-measurement reconciliation |
-| quantization concepts | [Hugging Face — Quantization concepts](https://huggingface.co/docs/transformers/quantization/concept_guide) | scheme, granularity, PTQ/QAT and formats | weight/activation/KV representation |
-| quantized deployment | [vLLM — Quantization](https://docs.vllm.ai/en/stable/features/quantization/index.html) | method and hardware support matrix | backend and hardware feasibility |
-| attention/KV architecture | [LLMs-from-scratch — Chapter 4 bonus material](https://github.com/rasbt/LLMs-from-scratch/tree/main/ch04) | GQA, MLA, window, DeltaNet, sparse and cross-layer sharing | readable mechanism and memory estimators |
-| KV memory and paging | [vLLM](../SERVING/VLLM.pdf) | PagedAttention memory model | persistent inference state |
-| communication primitives | [NCCL Collective Operations](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html) | collective semantics | payload, rounds, and synchronization |
-| queueing and iteration scheduling | [Orca](../SERVING/ORCA.pdf) | iteration-level scheduling | online request interference |
-| serving objectives | [DistServe](../SERVING/DISTSERVE.pdf) and [Sarathi-Serve](../SERVING/SARATHI.pdf) | metrics and SLO evaluation | TTFT, TPOT/ITL, E2E, throughput, goodput |
-| production SLOs | [Google SRE — Service Level Objectives](https://sre.google/sre-book/service-level-objectives/) | full chapter | SLI/SLO/error-budget contract |
-
-Required cost record for any later claim:
-
-- exact tensor/operator/request shape;
-- dtype and precision policy;
-- FLOPs and bytes moved;
-- persistent weights, KV/state, workspaces, and metadata;
-- serial steps, launches, barriers, collectives, and transfers;
-- request distribution, arrival process, queue state, and saturation;
-- predicted bottleneck before measurement;
-- measured profiler/serving evidence;
-- model, hardware, topology, software commit, and quality/SLO contract.
-
----
-
-## 4. Research Entry Points for Database Researchers
-
-| Entry point | Database analogy | LLM-systems problem |
-|---|---|---|
-| KV/state | buffer pool, paging, tiering | allocation, reuse, eviction, migration, prefetch |
-| scheduling | queues, admission, fairness | dynamic batches, interference, tail latency |
-| disaggregation | compute/storage separation | state transfer, placement, weak-interconnect boundaries |
-| MoE | partitioning and skew | expert placement, replication, all-to-all, hot experts |
-| reliability | logging/recovery/isolation | request resumption, stale state, tenant boundaries |
-
-The project catalog is [`10-research-projects.md`](10-research-projects.md).
-
----
-
-## 5. Reading and Code Strategy
-
-### English learning spine
-
-| Source | Primary use |
-|---|---|
-| [Dive into Deep Learning](https://github.com/d2l-ai/d2l-en) | mathematics, ML, neural-network, and PyTorch prerequisites |
-| [PyTorch Tutorials](https://github.com/pytorch/tutorials) | official framework tutorials and recipes |
-| [LLMs from Scratch](https://github.com/rasbt/LLMs-from-scratch) | decoder and language-model basics |
-| [The Annotated Transformer](https://github.com/harvardnlp/annotated-transformer) | executable original Transformer |
-| [Hugging Face Transformers](https://github.com/huggingface/transformers) | model semantics and configuration |
-| [Stanford CS336](https://github.com/stanford-cs336/lectures) | model, systems, scaling, and evaluation |
-| [LLMs from Scratch — Chapter 4 bonus material](https://github.com/rasbt/LLMs-from-scratch/tree/main/ch04) | memory analysis, KV, GQA, MLA, sliding window, DeltaNet, sparse attention, and cross-layer KV sharing |
-| [GPU MODE Lectures](https://github.com/gpu-mode/lectures) | GPU, kernels, and communication |
-| [Efficient Deep Learning Systems](https://github.com/mryab/efficient-dl-systems) | profiling, compilation, deployment, and inference |
-| [Google DeepMind Scaling Book](https://github.com/jax-ml/scaling-book) | topology, sharding, and cross-accelerator scaling |
-| [MLSysBook](https://github.com/harvard-edge/cs249r_book) | deployment, reliability, security, and systems breadth |
-
-The full categorized map is
-[`../RESOURCES/GITHUB-REPO-ATLAS.md`](../RESOURCES/GITHUB-REPO-ATLAS.md).
-
-### Source-reading order
+The target capability is not “know many model or paper names.” It is:
 
 ```text
-concept / paper claim
-→ model configuration and semantics
-→ minimal implementation
-→ production engine path
-→ compiler/kernel path
-→ profiler trace
-→ workload-level evaluation
+identify the semantic contract
+→ predict compute / memory / communication / state / queue cost
+→ locate the real implementation
+→ measure the limiting resource
+→ preserve correctness and quality
+→ state the workload and break-even boundary
 ```
 
 ---
 
-## 6. Competency Model
+## 2. Main Dependency Path
 
-The roadmap documents curate external explanations and point to paper/code taxonomies.
-[`COMPETENCY-GATES.md`](COMPETENCY-GATES.md) defines the required evidence and exit gates.
+| Layer | Document | Scope | Representative external entry |
+|---:|---|---|---|
+| 01 | [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md) | linear algebra, probability, optimization, neural networks, autograd and PyTorch | [Dive into Deep Learning](https://d2l.ai/) |
+| 02 | [`02-transformer-foundations.md`](02-transformer-foundations.md) | tokenization, attention, decoder LM, prefill/decode, KV and Hugging Face | [The Annotated Transformer](https://nlp.seas.harvard.edu/annotated-transformer/) |
+| 03 | [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md) | GPT/Llama/Qwen/DeepSeek, GQA/MQA/MLA, MoE, sparse/linear/recurrent/diffusion architectures | [LLM Architecture Gallery](https://sebastianraschka.com/llm-architecture-gallery/) |
+| 04 | [`04-training-post-training-systems.md`](04-training-post-training-systems.md) | data, tokenizer, scaling, distributed pretraining, SFT/PEFT, preference learning, RL rollout systems | [Stanford CS336](https://cs336.stanford.edu/) |
+| 05 | [`05-single-node-inference-optimization.md`](05-single-node-inference-optimization.md) | quantization, pruning, KV reduction, efficient attention, CUDA/Triton/CUTLASS, compiler/runtime | [Scaling Book — Inference](https://jax-ml.github.io/scaling-book/inference/) |
+| 06 | [`06-decoding-test-time-compute.md`](06-decoding-test-time-compute.md) | sampling/search, structured outputs, speculative decoding, parallel/diffusion decoding, reasoning compute | [HF generation strategies](https://huggingface.co/docs/transformers/generation_strategies) |
+| 07 | [`07-single-node-inference-engine.md`](07-single-node-inference-engine.md) | request state, scheduler, model runner, attention backend, sampler and streaming | [Nano-vLLM](https://github.com/GeeeekExplorer/nano-vllm) |
+| 08 | [`08-kv-scheduling-serving.md`](08-kv-scheduling-serving.md) | KV/state, batching, admission, scheduling, prefix reuse, disaggregation and serving metrics | [vLLM](../SERVING/VLLM.pdf) and [Orca](../SERVING/ORCA.pdf) |
+| 09 | [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md) | TP/PP/DP/CP/EP, collectives, topology, placement, MoE kernels/routing/skew | [Megatron-LM](../PARALLEL/MEGATRON.pdf) |
+| 10 | [`10-production-reliability.md`](10-production-reliability.md) | gateways, lifecycle, observability, overload, recovery, isolation, security, cost and energy | [Google SRE Book](https://sre.google/sre-book/table-of-contents/) |
+| 11 | [`11-bottleneck-research.md`](11-bottleneck-research.md) | workload/bottleneck matrix, falsifiable questions and evidence standards | [MLSys proceedings](https://proceedings.mlsys.org/) |
 
-Use it to answer:
-
-- can the concept be derived rather than repeated;
-- can the mechanism be implemented or traced;
-- can cost be predicted before measurement;
-- can profiler evidence confirm or falsify the prediction;
-- can correctness/quality constraints be separated from performance;
-- can negative cases and claim boundaries be stated?
+The path is dependency-ordered, not time-boxed. Enter at the first layer whose exit gate cannot
+already be defended.
 
 ---
 
-## 7. Final Standard
+## 3. Complete Topic Architecture
 
-The roadmap is complete when you can:
+### Layer 01 — AI, ML, Mathematics, and PyTorch
 
-- explain AI/ML training mechanics and use PyTorch without treating it as opaque;
-- implement and inspect a decoder Transformer and Hugging Face causal LM;
-- reconstruct modern LLM architecture from configuration;
-- calculate parameter, activation, KV/state, FLOP, and communication costs;
-- classify and trace quantization, KV compression/eviction, efficient attention and cross-layer
-  sharing without conflating their semantic and systems layers;
-- trace model code through compiler IR, kernels, and runtime dispatch;
-- profile prefill/decode and predict bottlenecks;
-- trace requests through scheduler, model runner, attention backend, state manager, and streaming;
-- reason about cache, batching, admission, preemption, prefix reuse, and tail latency;
-- choose parallelism and placement from model, workload, topology, and SLO;
-- analyze MoE routing, grouped GEMM, communication, skew, and expert placement;
-- reason about overload, faults, recovery, isolation, cost, and energy;
-- convert a measured bottleneck into a falsifiable, reproducible systems research claim.
+Sub-aspects:
+
+- tensors, shapes, dtypes, layouts and devices;
+- matrix multiplication, vector spaces, projections, eigendecomposition, SVD and PCA;
+- probability, likelihood, entropy, cross-entropy and KL divergence;
+- calculus, gradients, SGD, Adam/AdamW and generalization;
+- MLPs, activations, normalization, residual paths and computation graphs;
+- PyTorch modules, autograd, optimizers, data loading and model state.
+
+Read [`01-ai-ml-foundations.md`](01-ai-ml-foundations.md).
+
+### Layer 02 — Transformer and Language-Model Foundations
+
+Sub-aspects:
+
+- normalization, pre-tokenization, BPE/WordPiece/Unigram and special tokens;
+- embeddings, causal next-token likelihood and cross-entropy;
+- Q/K/V, attention masks, multi-head attention and positional encoding;
+- FFN/GLU, residual connections and normalization;
+- encoder-only, encoder-decoder and decoder-only families;
+- training, prefill, decode, autoregressive generation and KV cache;
+- Hugging Face config/tokenizer/model/generation/cache interfaces.
+
+Representative works: [Attention Is All You Need](../FOUNDATION/ATTENTION.pdf), GPT-family model
+papers and executable external tutorials in
+[`02-transformer-foundations.md`](02-transformer-foundations.md).
+
+### Layer 03 — Modern LLM Architecture
+
+Sub-aspects:
+
+- GPT, Llama, Mistral, Qwen, DeepSeek and other decoder families;
+- learned/sinusoidal positions, RoPE, ALiBi, YaRN and LongRoPE;
+- Pre/Post-Norm, RMSNorm, LayerNorm, SwiGLU and residual variants;
+- MHA, MQA, GQA and MLA;
+- full, sliding-window, local, sparse, retrieval and hybrid attention;
+- cross-layer KV/attention sharing: CLA, MLKV, YOCO and related designs;
+- dense FFN, MoE, fine-grained/shared experts and conditional depth;
+- linear/recurrent attention, RetNet, RWKV, Mamba/SSM and hybrid models;
+- MTP/speculative heads and early-exit-compatible models;
+- autoregressive, masked-diffusion and block-diffusion language models;
+- multimodal encoders/projectors/token streams and VLM request shapes.
+
+Read [`03-modern-llm-architecture.md`](03-modern-llm-architecture.md) and its linked primary papers.
+
+### Layer 04 — Training and Post-Training Systems
+
+Sub-aspects:
+
+- data acquisition, extraction, filtering, deduplication, decontamination, mixture and streaming;
+- tokenizer training, chat templates and training/serving parity;
+- causal/masked/span/FIM/multimodal objectives and scaling laws;
+- initialization, AdamW, schedules, mixed precision, checkpointing and profiling;
+- DDP, FSDP/ZeRO, TP, PP, SP/CP, EP and distributed checkpoints;
+- continued pretraining, SFT, LoRA/QLoRA and multi-adapter implications;
+- preference data, reward modeling, RLAIF and process/outcome rewards;
+- DPO/IPO/KTO/ORPO/SimPO-family offline preference optimization;
+- PPO/GRPO-family online RL and reasoning post-training;
+- rollout generation, weight synchronization, policy staleness and agent environments;
+- training–inference co-design for tokenizer, KV, MoE, MTP, precision and checkpoints.
+
+Read [`04-training-post-training-systems.md`](04-training-post-training-systems.md).
+
+### Layer 05 — Model, State, Kernel, and Runtime Optimization
+
+Sub-aspects:
+
+- source-grounded parameter/FLOP/byte/memory models and profiler reconciliation;
+- weight-only, weight-activation, KV, attention and MoE quantization;
+- INT8/INT4, FP8/FP4/NVFP4/MXFP4 and mixed precision;
+- GPTQ, AWQ, SmoothQuant, LLM.int8(), ZeroQuant, rotations and QAT;
+- pruning, structural sparsity, distillation and low-rank/structural reduction;
+- KV quantization, compression, eviction, selection, retrieval, tiering and offload;
+- GQA/MQA/MLA and cross-layer state sharing;
+- sliding-window, sparse, linear/recurrent/SSM and hybrid attention;
+- exact IO-aware attention: FlashAttention family and FlashInfer;
+- CUDA execution, Triton, CUTLASS/CuTe, fusion and CUDA Graphs;
+- TorchInductor, TensorRT-LLM and compiler/IR/backend dispatch;
+- hardware portability across NVIDIA, AMD, TPU, CPU and edge runtimes.
+
+Read [`05-single-node-inference-optimization.md`](05-single-node-inference-optimization.md).
+
+### Layer 06 — Decoding, Speculative Execution, and Test-Time Compute
+
+Sub-aspects:
+
+- greedy, temperature, top-k/top-p/min-p, typical/eta and contrastive decoding;
+- beam, diverse beam, best-of-N and parallel sampling;
+- JSON/regex/CFG/tool-call constrained generation;
+- classic small-draft/target speculative decoding and rejection sampling;
+- self-speculation, early exit and layer skipping;
+- Medusa, Hydra, MTP, ReDrafter and parallel draft heads;
+- EAGLE, EAGLE-2/3 and feature-level drafting;
+- prompt lookup, N-gram, suffix and REST retrieval proposals;
+- SpecInfer/Sequoia tree construction and block verification;
+- Lookahead/Jacobi/parallel decoding;
+- TriForce/MagicDec/LongSpec long-context speculation;
+- block-diffusion/DFlash draft generation and diffusion-LM decoding;
+- draft/target placement, verification kernels, provisional KV, rollback and compaction;
+- dynamic speculation under batching and scheduler pressure;
+- correctness/distribution preservation and reproducibility;
+- self-consistency, verifier-guided search, Tree of Thoughts, budget forcing and adaptive
+  test-time compute;
+- agent/tool multi-call execution and branch-state management.
+
+The pinned 30-paper speculative set, external intros, reference implementations and production
+paths are all indexed by
+[`06-decoding-test-time-compute.md`](06-decoding-test-time-compute.md).
+
+### Layer 07 — Single-Node Inference Engine
+
+Sub-aspects:
+
+- API/request/sequence lifecycle;
+- tokenizer/input processing and output streaming;
+- request queues and continuous batching;
+- prefill/decode mixing and token budgets;
+- paged/block KV allocation and prefix reuse;
+- preemption, swap, recompute and resume;
+- worker/model runner and execution plans;
+- attention/backend dispatch and CUDA Graph capture;
+- logits, sampling, structured output and speculative hooks;
+- CPU/GPU coordination and observability.
+
+Read [`07-single-node-inference-engine.md`](07-single-node-inference-engine.md).
+
+### Layer 08 — KV, Scheduling, and Online Serving
+
+Sub-aspects:
+
+- workload shape, arrival process, prefix structure and output uncertainty;
+- TTFT, TPOT/ITL, E2E latency, throughput, goodput, fairness and cost;
+- routing, admission and backpressure;
+- static/continuous batching and chunked prefill;
+- decode-first, priority, deadline and fair scheduling;
+- prefix cache, paged/virtual memory and multi-tier state;
+- KV quantization/compression/eviction and remote state;
+- multi-LoRA, structured-output, multimodal and reasoning request scheduling;
+- prefill/decode and encode/prefill/decode disaggregation;
+- cache-aware routing, autoscaling, migration and fault recovery;
+- simulation, trace replay and workload-valid evaluation.
+
+Read [`08-kv-scheduling-serving.md`](08-kv-scheduling-serving.md).
+
+### Layer 09 — Distributed Inference and MoE
+
+Sub-aspects:
+
+- accelerator/node/rack topology and collective cost;
+- TP, PP, DP/replicas, CP/SP and EP;
+- PCIe, NVLink/NVSwitch, InfiniBand/RoCE, RDMA and collective libraries;
+- communication/compute overlap and topology-aware placement;
+- heterogeneous and cross-accelerator execution;
+- disaggregated prefill/decode, remote KV and expert services;
+- MoE routing, capacity, auxiliary losses and load balance;
+- grouped GEMM, sparse kernels, fused MoE and quantized experts;
+- all-to-all dispatch/combine, expert placement, replication, caching and offload;
+- online MoE batching, hot experts, failures and observability.
+
+Read [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md).
+
+### Layer 10 — Production Platform, Lifecycle, and Reliability
+
+Sub-aspects:
+
+- API gateway, authentication, quota, routing and request normalization;
+- model registry, artifact lineage, checkpoint conversion and supply-chain safety;
+- model loading, cold start, warm pools, multi-model placement and adapter lifecycle;
+- control plane/data plane separation;
+- metrics, traces, logs, profiling and workload telemetry;
+- overload, admission, backpressure, degradation and autoscaling;
+- GPU/worker/node/network/cache failures and recovery;
+- cancellation, retry, replay, idempotency and state consistency;
+- multi-tenant isolation, privacy, security and abuse resistance;
+- correctness canaries, output parity and safe rollout/rollback;
+- capacity planning, cost, energy and carbon;
+- Kubernetes/operator and platform integration.
+
+Read [`10-production-reliability.md`](10-production-reliability.md).
+
+### Layer 11 — Bottleneck-Driven Research
+
+Read [`11-bottleneck-research.md`](11-bottleneck-research.md) for workload matrices, bottleneck
+classes, open systems questions, representative work and evidence standards. It is a research
+index, not a project list or schedule.
+
+---
+
+## 4. Cross-Cutting Coverage Matrix
+
+This matrix prevents a one-line mention from being mistaken for complete coverage.
+
+| Cross-cutting aspect | Architecture/model | Kernel/runtime | Engine/serving | Distributed/production |
+|---|---|---|---|---|
+| attention and persistent state | MHA/MQA/GQA/MLA/CLA/SSM | FlashAttention, sparse/linear kernels, KV format | paging, eviction, prefix cache | remote/tiered KV and transfer |
+| quantization/compression | trained/post-training precision, pruning | low-bit GEMM/attention/MoE kernels | loader/backend/fallback | communication dtype and fleet compatibility |
+| speculative decoding | MTP/Medusa/EAGLE/early exit | draft + verify kernels, tree masks | token budgets, rollback, dynamic depth | draft/target placement |
+| test-time reasoning | reasoning checkpoint and verifier | long decode/branch kernels | branch scheduling, shared prefixes | verifier/tool placement and quality-cost SLO |
+| MoE | routing and expert design | grouped GEMM and fused MoE | skew-aware batching | EP, all-to-all and expert placement |
+| multimodal/VLM | encoder/projector/visual tokens | vision/audio kernels and preprocessing | encode/prefill/decode lifecycle | encoder disaggregation and modality-aware routing |
+| embeddings/rerankers/encoders | encoder objectives and pooling | dense/batched encoder kernels | non-generative request path | multi-model pipelines |
+| structured outputs/tools | tokenizer/schema semantics | grammar mask kernels | parser state and tool wait/resume | sandbox/service reliability |
+| compiler/IR | graph and operator semantics | TorchInductor/Triton/TensorRT/MLIR | graph buckets and fallback | heterogeneous backend fleet |
+| hardware | precision/layout constraints | CUDA/ROCm/TPU/CPU/edge | memory capacity and concurrency | NVLink/RDMA/CXL/fabric and placement |
+| correctness | model/tokenizer contract | numerical parity | sampling/cache/state parity | rollout, recovery and version consistency |
+
+---
+
+## 5. Representative Architecture and Systems Lineage
+
+The detailed documents contain the complete categorized lists. This table gives the canonical
+lineage that should be recognizable before specializing.
+
+| Branch | Representative works |
+|---|---|
+| Transformer and decoder LM | Attention Is All You Need, GPT family, Llama family |
+| positions and decoder blocks | RoPE, ALiBi, RMSNorm, SwiGLU, YaRN/LongRoPE |
+| KV-head/state reduction | MQA, GQA, MLA, CLA, MLKV, YOCO |
+| efficient attention | FlashAttention 1/2/3, FlashInfer, StreamingLLM, MInference, Native Sparse Attention |
+| linear/recurrent/SSM | Linear Transformer, RetNet, RWKV, Mamba/Mamba-2, GLA, DeltaNet, Kimi Linear |
+| MoE | GShard, Switch, ST-MoE, Expert Choice, MegaBlocks, Mixtral, DeepSeekMoE/V2/V3 |
+| quantization | LLM.int8(), ZeroQuant, GPTQ, SmoothQuant, AWQ, Atom, QuaRot, SpinQuant, KIVI/KVQuant |
+| serving | Orca, vLLM/PagedAttention, SGLang, Sarathi-Serve, DistServe, Splitwise, Mooncake, Llumnix, Preble |
+| speculative decoding | SpecDecode, Speculative Sampling, Medusa, EAGLE 1/2/3, SpecInfer, Sequoia, LayerSkip, REST, TriForce, MagicDec |
+| training/post-training | Scaling Laws, Chinchilla, Megatron, ZeRO, LoRA/QLoRA, InstructGPT, DPO, GRPO, DeepSeek-R1 |
+| test-time compute | Self-Consistency, Tree of Thoughts, process reward models, compute-optimal test-time scaling, s1 |
+
+Local PDFs and provenance are indexed in [`../RESOURCES/SOURCES.md`](../RESOURCES/SOURCES.md).
+
+---
+
+## 6. Source-Grounded Cost Model
+
+The roadmap does not invent a new cost-model tutorial. Use:
+
+| Topic | External source | Roadmap use |
+|---|---|---|
+| compute, bandwidth and capacity | [Scaling Book — Rooflines](https://jax-ml.github.io/scaling-book/roofline/) | lower bounds and arithmetic intensity |
+| Transformer shapes/FLOPs | [Scaling Book — Transformer Math](https://jax-ml.github.io/scaling-book/transformers/) | operator and parameter ledger |
+| training | [Scaling Book — Training](https://jax-ml.github.io/scaling-book/training/) | activations, optimizer state and distributed cost |
+| inference | [Scaling Book — Inference](https://jax-ml.github.io/scaling-book/inference/) | prefill/decode/KV and batching |
+| GPU/framework overhead | [Making Deep Learning Go Brrrr](https://horace.io/brrr_intro.html) | launches, fusion, memory and compiler boundary |
+| memory measurement | [PyTorch CUDA memory](https://docs.pytorch.org/docs/main/torch_cuda_memory) | allocated/reserved/external memory |
+| GPU kernel evidence | [Nsight Systems](https://docs.nvidia.com/nsight-systems/) and [Nsight Compute](https://docs.nvidia.com/nsight-compute/) | timeline and per-kernel evidence |
+| network collectives | [NCCL collectives](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html) | payload and synchronization |
+| serving metrics | Orca, DistServe and Sarathi-Serve | TTFT/TPOT/E2E/goodput |
+| production objectives | [Google SRE — SLOs](https://sre.google/sre-book/service-level-objectives/) | SLI/SLO/error budget |
+
+Required record for any performance claim:
+
+```text
+model + tokenizer + revision
+workload and arrival distribution
+prefill / decode / verification / encode / tool phase
+tensor shapes, layouts and dtypes
+weights, activations, KV/state, workspaces and allocator pools
+FLOPs, bytes, launches, barriers, collectives and transfers
+parallelism and topology
+predicted bottleneck
+measured profiler + service evidence
+correctness / quality / SLO contract
+negative cases and break-even boundary
+```
+
+---
+
+## 7. External English Learning Spine
+
+| Source | Primary use |
+|---|---|
+| [Dive into Deep Learning](https://github.com/d2l-ai/d2l-en) | AI/ML, mathematics, neural-network and PyTorch prerequisites |
+| [PyTorch Tutorials](https://github.com/pytorch/tutorials) | official framework mechanics |
+| [The Annotated Transformer](https://github.com/harvardnlp/annotated-transformer) | executable original Transformer |
+| [LLMs from Scratch](https://github.com/rasbt/LLMs-from-scratch) | decoder basics plus GQA/MLA/KV/efficient-attention intros |
+| [Hugging Face LLM Course](https://huggingface.co/learn/llm-course/) | tokenizer, models, fine-tuning and generation |
+| [Stanford CS336](https://cs336.stanford.edu/) | end-to-end LM data/training/systems/evaluation |
+| [GPU MODE Lectures](https://github.com/gpu-mode/lectures) | GPU, Triton, CUDA, kernels and communication |
+| [Scaling Book](https://jax-ml.github.io/scaling-book/) | quantitative training/inference/distributed systems |
+| [Efficient Deep Learning Systems](https://github.com/mryab/efficient-dl-systems) | profiling, compilation and deployment |
+| [MLSysBook](https://github.com/harvard-edge/cs249r_book) | deployment, reliability, security and broader ML systems |
+| [vLLM](https://github.com/vllm-project/vllm), [SGLang](https://github.com/sgl-project/sglang), [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM) | production inference source |
+
+The full categorized GitHub map is
+[`../RESOURCES/GITHUB-REPO-ATLAS.md`](../RESOURCES/GITHUB-REPO-ATLAS.md).
+
+---
+
+## 8. Database-Researcher Entry Points
+
+| Database/systems concept | AI-systems analogue |
+|---|---|
+| buffer pool and paging | KV/state allocation, reuse, eviction, tiering and migration |
+| query scheduling and admission | continuous batching, token budgets, preemption, fairness and SLOs |
+| materialized views/cache | prefix cache, prompt reuse, shared branch state |
+| transactions/recovery | request state commit/rollback, cancellation, replay and recovery |
+| partitioning/skew | model/expert placement, MoE hot experts and load balance |
+| disaggregation | prefill/decode, remote KV, draft/target and expert services |
+| query optimization | kernel/backend/parallelism/placement selection |
+| adaptive execution | dynamic batching, speculative depth and test-time compute allocation |
+| provenance and governance | data/checkpoint lineage, model registry and rollout safety |
+
+---
+
+## 9. Competency and Completion Standard
+
+[`COMPETENCY-GATES.md`](COMPETENCY-GATES.md) tests whether a topic can be derived, traced and
+measured. The roadmap is complete when you can:
+
+- explain the AI/ML and Transformer foundations without treating framework calls as magic;
+- map a modern checkpoint/configuration to compute, memory, state, kernel and communication cost;
+- understand how data, tokenizer, training and post-training choices affect inference;
+- distinguish quantization, KV reduction, sparse/linear attention and exact IO-aware kernels;
+- trace ordinary, structured, speculative, diffusion and test-time reasoning generation paths;
+- trace a request through frontend, scheduler, model runner, attention backend, state manager,
+  sampler and stream;
+- choose parallelism and placement from workload, topology and SLO;
+- analyze dense and MoE inference, including routing, grouped GEMM, communication and skew;
+- reason about multimodal, embedding/reranking, multi-model and agent workloads rather than assuming
+  every request is text generation;
+- preserve tokenizer, numerical, sampling, cache and recovery correctness;
+- reason about overload, failures, isolation, lifecycle, security, cost and energy;
+- convert a measured bottleneck into a falsifiable and reproducible systems research claim.
 
 ---
 

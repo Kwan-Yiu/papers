@@ -4,7 +4,7 @@ External sources for model pruning, weight sparsity, structural reduction, and d
 inference optimizations.
 
 Companion map:
-[`../ROADMAP/04-single-node-inference-optimization.md`](../ROADMAP/04-single-node-inference-optimization.md).
+[`../ROADMAP/05-single-node-inference-optimization.md`](../ROADMAP/05-single-node-inference-optimization.md).
 
 ## 1. Concepts and deployment documentation
 

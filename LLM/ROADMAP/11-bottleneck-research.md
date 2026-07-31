@@ -6,8 +6,7 @@
 
 [Roadmap index](README.md) ·
 [Overview](00-roadmap.md) ·
-[Production reliability](08-production-reliability.md) ·
-[Project catalog](10-research-projects.md) ·
+[Production reliability](10-production-reliability.md) ·
 [Competency gates](COMPETENCY-GATES.md)
 
 ---
@@ -255,7 +254,7 @@ Research gaps:
 
 ### B9 — MoE imbalance and irregularity
 
-See [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md).
+See [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md).
 
 Research gaps:
 
@@ -535,6 +534,5 @@ The research deliverable is not "X% faster". It is:
 
 ---
 
-**Previous:** [`08-production-reliability.md`](08-production-reliability.md) ·
-**Project catalog:** [`10-research-projects.md`](10-research-projects.md) ·
+**Previous:** [`10-production-reliability.md`](10-production-reliability.md) ·
 **Back to overview:** [`00-roadmap.md`](00-roadmap.md)

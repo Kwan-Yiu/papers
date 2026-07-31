@@ -1,18 +1,19 @@
 # KV Cache, Scheduling, and Serving Systems
 
-> Scope: workload → scheduler → KV/state → decoding → serving policy.
+> Scope: workload → scheduler → KV/state → decoding integration → serving policy.
 >
 > Snapshot: 2026-07-31
 >
-> Companion: [`09-bottleneck-research.md`](09-bottleneck-research.md)
+> Companion: [`11-bottleneck-research.md`](11-bottleneck-research.md)
 >
-> Boundary: distributed and operations sections define interfaces to Layers 07 and 08.
+> Boundary: distributed and operations sections define interfaces to Layers 09 and 10.
 
 [Roadmap index](README.md) ·
 [Overview](00-roadmap.md) ·
-[Single-node optimization](04-single-node-inference-optimization.md) ·
-[Single-node engine](05-single-node-inference-engine.md) ·
-[Distributed inference and MoE](07-distributed-inference-moe.md) ·
+[Single-node optimization](05-single-node-inference-optimization.md) ·
+[Decoding and test-time compute](06-decoding-test-time-compute.md) ·
+[Single-node engine](07-single-node-inference-engine.md) ·
+[Distributed inference and MoE](09-distributed-inference-moe.md) ·
 [Competency gates](COMPETENCY-GATES.md)
 
 ---
@@ -45,7 +46,7 @@ the cost was merely shifted to another layer.
 |---|---|
 | 1–3 | workload, service metrics, and request lifecycle |
 | 4–6 | scheduling, memory/state, compiler, runtime, and kernels |
-| 7 | decoding algorithms |
+| 7 | decoding and test-time-compute integration boundaries |
 | 8–10 | integration boundaries: distributed inference, orchestration, and frameworks |
 | 11–13 | code-reading paths, evaluation matrix, and exit criterion |
 
@@ -618,71 +619,26 @@ A research artifact must log selected backend, not just framework version.
 
 ---
 
-## 7. Decoding algorithm taxonomy
+## 7. Decoding and Test-Time Compute Integration
 
-### 7.1 Baseline autoregressive
+The complete method, paper, tutorial, code and correctness taxonomy is maintained in
+[`06-decoding-test-time-compute.md`](06-decoding-test-time-compute.md). This serving stage owns the
+online integration boundary:
 
-- greedy;
-- temperature sampling;
-- top-k/top-p/min-p;
-- beam search;
-- best-of / parallel sampling.
+- admission of ordinary, constrained, speculative and multi-branch requests;
+- target-token, draft-token, candidate-tree and reasoning-token budgets;
+- continuous batching with variable accepted length;
+- dynamic enable/disable and speculation depth from concurrency;
+- draft/target placement and resource isolation;
+- provisional KV allocation, commit, rollback and compaction;
+- grammar/parser state for structured outputs;
+- branch state, cancellation and shared-prefix KV for test-time search;
+- fairness between short ordinary requests and long reasoning or agent requests;
+- TTFT, TPOT/ITL, E2E, goodput, useful solved tasks/s and cost under SLO.
 
-Sampling policy changes output length, branching and speculative acceptance.
-
-### 7.2 Draft-model speculative decoding
-
-Small draft proposes multiple tokens; target verifies in parallel.
-
-Cost model:
-
-```text
-speedup depends on
-draft latency
-accepted tokens per target step
-verification efficiency
-target batch interference
-extra memory
-```
-
-### 7.3 Self-speculative
-
-- layer skipping/early exit;
-- intermediate features;
-- MTP/Medusa heads;
-- EAGLE-like feature draft;
-- model-internal proposal.
-
-### 7.4 Retrieval/prompt-based proposals
-
-- n-gram;
-- prompt lookup;
-- suffix decoding;
-- repeated code/text patterns.
-
-Cheap and useful when workload has repetition; weak on novel text.
-
-### 7.5 Tree verification
-
-Verify multiple branches/tokens with tree attention. Must manage:
-
-- position ids;
-- causal mask/tree topology;
-- temporary KV;
-- accepted-path compaction;
-- graph shapes.
-
-### 7.6 Serving interaction
-
-Speculation is not an isolated per-request optimization:
-
-- draft consumes GPU/CPU capacity;
-- verification changes token budget;
-- acceptance varies by request;
-- longer target steps affect fairness;
-- rejected tokens are wasted work;
-- draft/target can be disaggregated;
-- batching can lower acceptance benefit.
+Do not reproduce the decoding taxonomy here. When analyzing the scheduler, import the declared
+correctness class, proposer/search shape, state footprint and workload-dependent break-even point
+from Stage 06.
 
 ---
 
@@ -737,7 +693,7 @@ Costs:
 
 ### 8.4 Expert parallelism
 
-See [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md). Adds two all-to-all-like phases per MoE layer.
+See [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md). Adds two all-to-all-like phases per MoE layer.
 
 ### 8.5 Context/sequence parallelism
 
@@ -1007,6 +963,6 @@ falsify your bottleneck hypothesis.
 
 ---
 
-**Previous:** [`05-single-node-inference-engine.md`](05-single-node-inference-engine.md) ·
-**Next:** [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md) ·
-**Research map:** [`09-bottleneck-research.md`](09-bottleneck-research.md)
+**Previous:** [`07-single-node-inference-engine.md`](07-single-node-inference-engine.md) ·
+**Next:** [`09-distributed-inference-moe.md`](09-distributed-inference-moe.md) ·
+**Research map:** [`11-bottleneck-research.md`](11-bottleneck-research.md)
