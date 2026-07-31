@@ -1,7 +1,16 @@
 # LLM Inference Bottleneck and Research Map
 
 > Target: identify a paper-worthy systems problem, not merely reproduce a speedup.
-> Snapshot: 2026-07-30
+>
+> Snapshot: 2026-07-31
+
+[Roadmap index](README.md) ·
+[Overview](00-roadmap.md) ·
+[Production reliability](08-production-reliability.md) ·
+[Project catalog](10-research-projects.md) ·
+[Competency gates](COMPETENCY-GATES.md)
+
+---
 
 Modern LLM inference has no permanent bottleneck. The limiting component is jointly determined by:
 
@@ -21,6 +30,17 @@ A research question should take this form:
 > Under workload `W`, hardware/topology `H`, and SLO `S`, component `C` becomes the critical path
 > because of mechanism `M`. Design `D` changes bytes/FLOPs/serial steps/queueing, and no benefit is
 > claimed beyond boundary `B`.
+
+---
+
+## Document Guide
+
+| Sections | Focus |
+|---|---|
+| 1–2 | workload matrix and bottleneck classes |
+| 3 | database-systems analogy map |
+| 4–5 | research idea cards and topic selection |
+| 6–7 | evidence progression and paper-quality evaluation |
 
 ---
 
@@ -164,10 +184,12 @@ Research gaps:
 - multimodal encode/prefill overlap;
 - burst-aware prefill admission.
 
-### B6 — Kernel launch and CPU runtime
+### B6 — Compiler, kernel launch, and CPU runtime
 
 Symptoms:
 
+- graph breaks or repeated compilation;
+- excessive shape specialization;
 - visible GPU gaps;
 - small model/small batch;
 - many short kernels;
@@ -176,6 +198,9 @@ Symptoms:
 
 Research gaps:
 
+- dynamic-shape compilation for serving;
+- graph/compiled-artifact caching across workload changes;
+- compiler decisions aware of paged KV, MoE skew, and online batches;
 - event-driven GPU scheduler;
 - persistent execution;
 - dynamic-shape graph capture;
@@ -229,7 +254,7 @@ Research gaps:
 
 ### B9 — MoE imbalance and irregularity
 
-See [`04-moe-deep-dive.md`](04-moe-deep-dive.md).
+See [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md).
 
 Research gaps:
 
@@ -444,7 +469,7 @@ Score each direction from 0–3:
 | measurable mechanism | can you count bytes/FLOPs/queue/communication? |
 | novelty | do current systems leave a clear gap? |
 | generality | does it cover more than one model/trace? |
-| falsifiability | can an experiment prove the idea wrong? |
+| falsifiability | can an evaluation prove the idea wrong? |
 | quality semantics | can you state exact/approximate behavior? |
 | implementation scope | can one researcher finish a strong prototype? |
 | paper story | is there one coherent thesis? |
@@ -463,7 +488,7 @@ Kernel-only projects are valuable but require a different comparative advantage 
 
 ---
 
-## 6. Evidence ladder
+## 6. Evidence Progression
 
 Do not jump from idea to end-to-end benchmark.
 
@@ -482,7 +507,7 @@ At every level record a falsification condition.
 
 ---
 
-## 7. Paper-quality experiment checklist
+## 7. Paper-Quality Evaluation Checklist
 
 - precise problem and non-goals;
 - open-source baseline at pinned commit;
@@ -506,3 +531,9 @@ The research deliverable is not "X% faster". It is:
 3. an implementation;
 4. an evaluation that explains why/when it works;
 5. a boundary where it stops working.
+
+---
+
+**Previous:** [`08-production-reliability.md`](08-production-reliability.md) ·
+**Project catalog:** [`10-research-projects.md`](10-research-projects.md) ·
+**Back to overview:** [`00-roadmap.md`](00-roadmap.md)

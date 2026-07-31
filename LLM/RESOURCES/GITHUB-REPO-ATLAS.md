@@ -1,13 +1,20 @@
 # GitHub Repository Atlas for LLM Inference and AI Systems
 
-> Deep-search snapshot: 2026-07-30
+> Deep-search snapshot: 2026-07-31
 >
 > Selection rule: official implementations and widely used infrastructure first.
 > Exact local commits: [`SOURCES.md`](SOURCES.md)
 
+[Library home](../README.md) ·
+[Roadmap](../ROADMAP/00-roadmap.md) ·
+[Competency spine](../ROADMAP/COMPETENCY-GATES.md) ·
+[Local sources](SOURCES.md)
+
+---
+
 ## Legend
 
-- **A** — core: read code or run experiments;
+- **A** — core: read code or run controlled evaluations;
 - **B** — directional: read when selecting that subfield;
 - **C** — reference: know what it is; do not clone/read linearly;
 - **L** — shallow clone exists under `RESOURCES/repos/`;
@@ -21,11 +28,35 @@ engine, paper artifact, kernel library, teaching implementation or archived wrap
 
 ---
 
+## Curated English Learning Spine
+
+These repositories provide the smallest coherent learning spine for the roadmap. `Link` means the
+repository is catalogued but intentionally not cloned.
+
+| Pri | Local | Repository | Roadmap role |
+|---|---|---|---|
+| A | L | [stanford-cs336/lectures](https://github.com/stanford-cs336/lectures) | model mechanics, profiling, Triton, and distributed foundations |
+| A | L | [gpu-mode/lectures](https://github.com/gpu-mode/lectures) | GPU architecture, kernels, collectives, and backend internals |
+| A | Link | [huggingface/course](https://github.com/huggingface/course) | beginner-to-intermediate Transformers concepts and Hugging Face workflows |
+| A | Link | [mryab/efficient-dl-systems](https://github.com/mryab/efficient-dl-systems) | profiling, compilation, distributed execution, deployment, and serving |
+| A | Link | [jax-ml/scaling-book](https://github.com/jax-ml/scaling-book) | Roofline, topology, sharding, TPU/JAX/XLA, and inference scaling |
+| B | Link | [llmsystem/llmsystem.github.io](https://github.com/llmsystem/llmsystem.github.io) | selective LLM lifecycle, acceleration, compression, and deployment |
+| B | Link | [llmsystem/llmsys_code_examples](https://github.com/llmsystem/llmsys_code_examples) | compact distributed and speculative-decoding code examples |
+| B | Link | [harvard-edge/cs249r_book](https://github.com/harvard-edge/cs249r_book) | deployment, reliability, security, sustainability, and broader ML systems |
+| C | Link | [fanlai0990/CS598](https://github.com/fanlai0990/CS598) | systems-for-GenAI paper reading and research critique |
+
+Use [microsoft/AI-System](https://github.com/microsoft/AI-System) and broad paper lists only as
+coverage cross-checks. They are not part of the English learning spine and should not be cloned by
+default.
+
+---
+
 ## 1. Learning and model semantics
 
 | Pri | Local | Repository | Type | Read for |
 |---|---|---|---|---|
 | A | L | [huggingface/transformers](https://github.com/huggingface/transformers) | model-definition framework | canonical configs and readable model semantics across dense/MoE/SSM families |
+| A | Link | [huggingface/course](https://github.com/huggingface/course) | official course | tokenizers, Transformers, model use, fine-tuning, and ecosystem foundations |
 | A | R | [rasbt/LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch) | tutorial/reference | build decoder, tokenizer and training loop from first principles |
 | A | R | [harvardnlp/annotated-transformer](https://github.com/harvardnlp/annotated-transformer) | tutorial/reference | line-by-line original Transformer |
 | A | L | [stanford-cs336/lectures](https://github.com/stanford-cs336/lectures) | course | language modeling, scaling, systems and inference |
@@ -126,6 +157,10 @@ engine, paper artifact, kernel library, teaching implementation or archived wrap
 | A | R | [triton-lang/triton](https://github.com/triton-lang/triton) | GPU DSL/compiler | implement and autotune custom kernels |
 | A | L | [NVIDIA/cutlass](https://github.com/NVIDIA/cutlass) | CUDA templates/CuTe DSL | GEMM/grouped-GEMM and architecture-specific kernels |
 | A | L | [deepseek-ai/DeepGEMM](https://github.com/deepseek-ai/DeepGEMM) | LLM tensor-core kernels | low-precision GEMM and fused MoE work |
+| B | Link | [pytorch/pytorch](https://github.com/pytorch/pytorch) | framework compiler/runtime | TorchDynamo, Inductor, distributed runtime, and operator dispatch |
+| B | Link | [openxla/xla](https://github.com/openxla/xla) | accelerator compiler | HLO, whole-graph optimization, sharding, and TPU/GPU lowering |
+| B | Link | [jax-ml/jax](https://github.com/jax-ml/jax) | array/compiler frontend | JIT, sharding, distributed arrays, and XLA execution |
+| B | Link | [apache/tvm](https://github.com/apache/tvm) | ML compiler stack | IR, scheduling, code generation, and portable deployment |
 | B | Link | [facebookresearch/xformers](https://github.com/facebookresearch/xformers) | optimized Transformer blocks | composable attention/building blocks |
 | B | Link | [NVIDIA/cudnn-frontend](https://github.com/NVIDIA/cudnn-frontend) | cuDNN frontend/open kernels | graph and kernel APIs |
 | B | Link | [ROCm/aiter](https://github.com/ROCm/aiter) | AMD tensor engine | ROCm attention/MoE/operator paths |

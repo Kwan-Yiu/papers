@@ -1,9 +1,20 @@
-# Research Project Ladder
+# Research Project Catalog
 
-Projects are ordered by fit with a database-systems background. Every project begins with
+> **Role:** bounded project formulations derived from measured inference bottlenecks
+>
+> **Selection rule:** choose by problem fit and available evidence, not by document order
+
+[Roadmap index](README.md) ·
+[Overview](00-roadmap.md) ·
+[Bottleneck research](09-bottleneck-research.md) ·
+[Competency gates](COMPETENCY-GATES.md)
+
+---
+
+Projects are grouped by fit with a database-systems background. Every project begins with workload
 characterization before mechanism design. For 15 more detailed idea cards, a bottleneck matrix, and
-an evidence ladder, see
-[`06-bottleneck-research-map.md`](06-bottleneck-research-map.md).
+an evidence progression, see
+[`09-bottleneck-research.md`](09-bottleneck-research.md).
 
 ## P1 — Tiered KV Cache as a Storage Engine
 
@@ -22,7 +33,7 @@ memory while satisfying TTFT and ITL SLOs?
 
 vLLM/SGLang with LRU; Mooncake/LMCache-style remote caches.
 
-**Minimum experiment**
+**Minimum evaluation**
 
 - real or synthetic prompt-prefix traces;
 - HBM-budget and tier-bandwidth sweeps;
@@ -47,7 +58,7 @@ How can a request-level scheduler use a workflow DAG, turn identity, and predict
 Retaining cache improves next-turn TTFT but occupies HBM and reduces current batch capacity.
 Offloading recovers capacity but adds I/O.
 
-**Minimum experiment**
+**Minimum evaluation**
 
 - multi-turn and tool-gap traces;
 - request-level FCFS/LRU;
@@ -75,7 +86,7 @@ benefit = removed prefill/decode interference
 cost    = KV serialization + transfer + queueing + placement imbalance
 ```
 
-**Minimum experiment**
+**Minimum evaluation**
 
 - network-bandwidth and latency sweeps;
 - prompt/output-ratio sweeps;
@@ -101,7 +112,7 @@ Single-request acceptance and speedup do not automatically translate into servin
 additional compute, KV state, and batch interactions introduced by verification can reverse the
 benefit.
 
-**Minimum experiment**
+**Minimum evaluation**
 
 - acceptance and draft/verification cost;
 - batch, context, and request-rate sweeps;
@@ -122,7 +133,7 @@ Follow foundation → EAGLE → tree → long-context in
 How should expert placement, replication, token routing, and batch formation be coordinated to
 reduce all-to-all traffic and hot-expert imbalance?
 
-**Minimum experiment**
+**Minimum evaluation**
 
 - real or model-generated routing distributions;
 - uniform, skewed, and drifting workloads;
@@ -131,7 +142,7 @@ reduce all-to-all traffic and hot-expert imbalance?
 
 **Read / code**
 
-[`04-moe-deep-dive.md`](04-moe-deep-dive.md) → DeepSpeed-MoE → MegaBlocks → DeepSeek-V3 →
+[`07-distributed-inference-moe.md`](07-distributed-inference-moe.md) → DeepSpeed-MoE → MegaBlocks → DeepSeek-V3 →
 `RESOURCES/repos/deepep`.
 
 **Difficulty**
@@ -148,7 +159,7 @@ trace-driven simulator.
 How can a system cheaply select or generate correct, fast attention/GEMM kernels across prefill,
 decode, paged/ragged KV, GQA/MLA, and different GPUs?
 
-**Minimum experiment**
+**Minimum evaluation**
 
 - shape distributions from real serving traces;
 - Triton, FlashInfer, and vendor-kernel baselines;
@@ -182,3 +193,9 @@ Before implementation begins, every answer below must be yes:
 P1 and P2 are the strongest starting points for a database researcher. They make direct use of
 caching, storage, scheduling, and workload-modeling experience and can produce solid evidence on a
 single machine plus a simulator.
+
+---
+
+**Previous:** [`09-bottleneck-research.md`](09-bottleneck-research.md) ·
+**Competency gates:** [`COMPETENCY-GATES.md`](COMPETENCY-GATES.md) ·
+**Back to overview:** [`00-roadmap.md`](00-roadmap.md)

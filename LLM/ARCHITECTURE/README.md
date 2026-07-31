@@ -3,7 +3,7 @@
 Model-component papers selected for inference-systems reasoning. Read the architecture delta and immediately ask how
 it changes persistent state, memory traffic, kernel shapes, parallelism and scheduling.
 
-Companion taxonomy: [`../ROADMAP/03-architecture-taxonomy.md`](../ROADMAP/03-architecture-taxonomy.md).
+Companion taxonomy: [`../ROADMAP/03-modern-llm-architecture.md`](../ROADMAP/03-modern-llm-architecture.md).
 
 ## 1. Modern decoder components
 

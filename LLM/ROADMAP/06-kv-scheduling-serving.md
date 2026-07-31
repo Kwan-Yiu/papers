@@ -1,9 +1,20 @@
-# LLM Inference Systems Taxonomy
+# KV Cache, Scheduling, and Serving Systems
 
-> Scope: single request → GPU kernel → multi-node production serving.
+> Scope: workload → scheduler → KV/state → decoding → serving policy.
 >
-> Snapshot: 2026-07-30
-> Companion: [`06-bottleneck-research-map.md`](06-bottleneck-research-map.md)
+> Snapshot: 2026-07-31
+>
+> Companion: [`09-bottleneck-research.md`](09-bottleneck-research.md)
+>
+> Boundary: distributed and operations sections define interfaces to Layers 07 and 08.
+
+[Roadmap index](README.md) ·
+[Overview](00-roadmap.md) ·
+[Single-node engine](05-single-node-inference-engine.md) ·
+[Distributed inference and MoE](07-distributed-inference-moe.md) ·
+[Competency gates](COMPETENCY-GATES.md)
+
+---
 
 An LLM serving stack is not merely a model behind an HTTP server. The complete path is:
 
@@ -24,6 +35,18 @@ client
 
 The first rule of systems research is to identify the layer being optimized and determine whether
 the cost was merely shifted to another layer.
+
+---
+
+## Document Guide
+
+| Sections | Focus |
+|---|---|
+| 1–3 | workload, service metrics, and request lifecycle |
+| 4–6 | scheduling, memory/state, compiler, runtime, and kernels |
+| 7 | decoding algorithms |
+| 8–10 | integration boundaries: distributed inference, orchestration, and frameworks |
+| 11–13 | code-reading paths, evaluation matrix, and exit criterion |
 
 ---
 
@@ -515,7 +538,42 @@ Characteristics:
 - KV dtype and head-sharing dominate bytes;
 - batch metadata and launch overhead matter.
 
-### 6.4 CUDA Graph / graph capture
+### 6.4 Graph compilation and lowering
+
+Execution layers:
+
+```text
+eager framework operators
+→ graph capture and guards
+→ framework / compiler IR
+→ decomposition and fusion
+→ scheduling and memory planning
+→ generated or library kernels
+→ runtime dispatch and cache
+```
+
+Important mechanisms:
+
+- TorchDynamo guards and graph breaks;
+- dynamic-shape specialization and recompilation;
+- AOTAutograd and operator decomposition;
+- Inductor scheduling and Triton/CUDA code generation;
+- XLA-style whole-graph compilation and sharding;
+- layout propagation, fusion, buffer reuse, and memory planning;
+- compiled-artifact caching and invalidation.
+
+Serving-specific risks:
+
+- dynamic batches and sequence lengths create many guarded shapes;
+- paged KV block tables and MoE routing introduce irregular metadata;
+- structured decoding and speculation alter control flow;
+- compilation latency or cache misses can enter TTFT;
+- fusion can reduce HBM traffic while increasing register pressure or reducing backend choice.
+
+A compiler comparison must record graph count, graph breaks, recompilations, generated backend,
+compile latency, runtime latency, and peak memory.
+
+### 6.5 CUDA Graph / graph capture
 
 Benefits:
 
@@ -541,7 +599,7 @@ Strategies:
 - graph only model core;
 - dynamic-shape compilation.
 
-### 6.5 Kernel selection
+### 6.6 Kernel selection
 
 No single backend wins all shapes. Runtime may choose among:
 
@@ -676,7 +734,7 @@ Costs:
 
 ### 8.4 Expert parallelism
 
-See [`04-moe-deep-dive.md`](04-moe-deep-dive.md). Adds two all-to-all-like phases per MoE layer.
+See [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md). Adds two all-to-all-like phases per MoE layer.
 
 ### 8.5 Context/sequence parallelism
 
@@ -943,3 +1001,9 @@ You should be able to take one latency trace and decompose it into:
 
 You should also be able to locate each component in at least one production engine and design a workload that can
 falsify your bottleneck hypothesis.
+
+---
+
+**Previous:** [`05-single-node-inference-engine.md`](05-single-node-inference-engine.md) ·
+**Next:** [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md) ·
+**Research map:** [`09-bottleneck-research.md`](09-bottleneck-research.md)

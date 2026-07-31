@@ -1,9 +1,230 @@
-# Mixture-of-Experts Deep Dive: Architecture → Kernel → Cluster
+# Distributed Inference and Mixture-of-Experts
 
-> Goal: understand MoE as an end-to-end inference system.
+> Goal: understand dense and sparse distributed inference from topology to end-to-end serving.
 >
-> Snapshot: 2026-07-30
-> Read after: [`03-architecture-taxonomy.md`](03-architecture-taxonomy.md)
+> Snapshot: 2026-07-31
+>
+> Read after: [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
+
+[Roadmap index](README.md) ·
+[Overview](00-roadmap.md) ·
+[Serving systems](06-kv-scheduling-serving.md) ·
+[Production reliability](08-production-reliability.md) ·
+[Competency gates](COMPETENCY-GATES.md)
+
+---
+
+## Document Guide
+
+| Sections | Focus |
+|---|---|
+| 0 | dense distributed-inference foundations |
+| 1–3 | mathematical model, routing taxonomy, and load balancing |
+| 4–7 | execution pipeline, prefill/decode behavior, kernels, and communication |
+| 8–10 | parallelism composition, placement, offload, and online serving |
+| 11–12 | architecture case studies and exact code-reading paths |
+| 13 | validation ladder |
+| 14–16 | research opportunities, invalid conclusions, and exit criterion |
+
+---
+
+## 0. Distributed Inference Foundations
+
+### 0.1 Why distribute inference
+
+Distribute a model or workload only for a declared reason:
+
+- model weights do not fit on one accelerator;
+- KV/state or workspace limits concurrency;
+- one device cannot satisfy latency;
+- replicas are needed for throughput or availability;
+- prefill and decode require different resources;
+- MoE experts exceed local capacity;
+- state locality or hardware heterogeneity favors placement.
+
+Every additional rank adds communication, synchronization, placement, and failure complexity.
+
+### 0.2 Distributed cost model
+
+For each parallel region, record:
+
+```text
+local parameter bytes
+local activation/state bytes
+compute per rank
+messages and payload bytes
+collective rounds
+critical-path imbalance
+temporary communication buffers
+serialization and synchronization
+```
+
+A basic transfer estimate:
+
+```text
+transfer_time
+≈ software_latency
+ + payload_bytes / effective_bandwidth
+ + contention
+ + synchronization_tail
+```
+
+Effective bandwidth depends on message size, topology, peers, protocol, and concurrent compute.
+
+### 0.3 Data parallelism / replicas
+
+Each replica owns a full model and serves different requests.
+
+Strengths:
+
+- high aggregate throughput;
+- failure/placement flexibility;
+- no per-layer model collective.
+
+Limits:
+
+- full weights per replica;
+- cache/model locality affects routing;
+- one replica still must fit and meet latency.
+
+For online inference, data parallelism usually means request-level replication rather than
+training-gradient synchronization.
+
+### 0.4 Tensor parallelism
+
+Partition large matrices across ranks. Typical layer execution uses collectives such as:
+
+- all-reduce;
+- all-gather;
+- reduce-scatter.
+
+Benefits:
+
+- divides weight capacity and compute;
+- can reduce single-request latency when communication is fast.
+
+Costs:
+
+- per-layer synchronization;
+- smaller local GEMMs;
+- topology sensitivity;
+- one slow rank delays the group.
+
+### 0.5 Pipeline parallelism
+
+Partition layers into stages:
+
+```text
+stage 0 → stage 1 → ... → stage P-1
+```
+
+Benefits:
+
+- divides weight capacity;
+- uses point-to-point activation transfer.
+
+Costs:
+
+- pipeline bubbles;
+- stage imbalance;
+- activation transfer;
+- request/microbatch scheduling complexity;
+- state ownership across stages.
+
+### 0.6 Context and sequence parallelism
+
+Partition sequence/token work where attention or long-context memory exceeds one device. Depending
+on the method, ranks exchange:
+
+- Q/K/V blocks;
+- partial attention outputs/statistics;
+- activations;
+- KV/state.
+
+The communication pattern differs between prefill and decode.
+
+### 0.7 Expert parallelism
+
+Partition MoE experts across ranks. Tokens move to selected experts and outputs return:
+
+```text
+route
+→ dispatch / all-to-all
+→ expert compute
+→ combine / all-to-all
+```
+
+The rest of this document develops this path in detail.
+
+### 0.8 Collectives
+
+Know the semantics and likely use of:
+
+| Primitive | Typical use |
+|---|---|
+| all-reduce | combine partial outputs |
+| all-gather | assemble partitioned activations/weights |
+| reduce-scatter | reduce and retain partitions |
+| all-to-all | expert/token redistribution |
+| broadcast | distribute shared data |
+| point-to-point | pipeline/state transfer |
+
+Benchmark latency and bandwidth across realistic message sizes. Large-message peak bandwidth does
+not predict decode-time small-message latency.
+
+### 0.9 Topology
+
+Distinguish:
+
+```text
+within accelerator package
+→ within node over NVLink/NVSwitch/xGMI
+→ cross-socket PCIe
+→ cross-node InfiniBand/RoCE/Ethernet
+→ storage/state paths
+```
+
+Placement should keep frequent, latency-sensitive communication on stronger links when capacity and
+failure constraints permit.
+
+### 0.10 Parallelism composition
+
+Real deployments combine axes:
+
+```text
+replicas × pipeline × tensor/context × expert parallelism
+```
+
+Verify that the product of degrees matches the physical rank count and that each axis has a clear
+ownership/communication boundary.
+
+### 0.11 Disaggregation
+
+Possible separations:
+
+- prefill workers versus decode workers;
+- compute versus KV/state storage;
+- encoder versus decoder;
+- draft versus target model;
+- router/control plane versus model workers.
+
+Disaggregation is beneficial only when specialization/locality gains exceed transfer, queueing,
+serialization, and failure-management cost.
+
+### 0.12 Required distributed evidence
+
+- per-rank memory ledger;
+- parallelism calculator;
+- topology diagram;
+- collective/message-size model;
+- measured-versus-predicted communication;
+- load/straggler distribution;
+- prefill/decode comparison;
+- break-even boundary against a colocated or smaller-parallelism baseline.
+
+---
+
+## MoE Transition
 
 The basic appeal of MoE is partially decoupling **model capacity** from **compute per token**:
 
@@ -780,7 +1001,7 @@ Study for routing/capacity concepts, not as the final modern inference implement
 ### Qwen MoE
 
 - dense and MoE variants within one family;
-- useful for controlled systems experiments;
+- useful for controlled systems evaluations;
 - inspect actual config because expert count/top-k differs across releases.
 
 ### GPT-OSS
@@ -838,7 +1059,7 @@ Study for routing/capacity concepts, not as the final modern inference implement
 
 ---
 
-## 13. Experimental ladder
+## 13. Validation Ladder
 
 ### M0 — Router only
 
@@ -1031,4 +1252,10 @@ You should be able to:
 4. draw EP dispatch → compute → combine and mark barriers;
 5. explain why prefill and decode need different MoE paths;
 6. map router, dispatcher, grouped GEMM and communication to local code;
-7. design an experiment that includes skew, topology, tail latency and quality.
+7. design an evaluation that includes skew, topology, tail latency and quality.
+
+---
+
+**Previous:** [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md) ·
+**Next:** [`08-production-reliability.md`](08-production-reliability.md) ·
+**Research map:** [`09-bottleneck-research.md`](09-bottleneck-research.md)

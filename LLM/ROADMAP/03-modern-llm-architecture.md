@@ -1,9 +1,18 @@
-# LLM Architecture Taxonomy for Systems Researchers
+# Modern LLM Architecture for Systems Researchers
 
 > Purpose: read an architecture as a cost model, not as a list of model names.
 >
-> Snapshot: 2026-07-30
-> Companion: [`04-moe-deep-dive.md`](04-moe-deep-dive.md), [`05-inference-systems-taxonomy.md`](05-inference-systems-taxonomy.md)
+> Snapshot: 2026-07-31
+>
+> Companion: [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md), [`06-kv-scheduling-serving.md`](06-kv-scheduling-serving.md)
+
+[Roadmap index](README.md) ·
+[Overview](00-roadmap.md) ·
+[Transformer foundations](02-transformer-foundations.md) ·
+[GPU/compiler/kernels](04-gpu-compiler-kernels.md) ·
+[Competency gates](COMPETENCY-GATES.md)
+
+---
 
 For an inference-systems researcher, the important question is not whether Llama, Qwen, or
 DeepSeek is stronger. Ask instead:
@@ -14,6 +23,17 @@ DeepSeek is stronger. Ask instead:
 4. Which state must remain in HBM, and which can be paged, compressed, migrated, or recomputed?
 5. Which synchronization and communication costs appear on one GPU, one node, and multiple nodes?
 6. How does an architecture delta change prefill, decode, batching, and SLO behavior?
+
+---
+
+## Document Guide
+
+| Sections | Focus |
+|---|---|
+| 1–2 | canonical decoder and architecture dimensions |
+| 3–4 | model-family deltas and architecture-to-bottleneck mapping |
+| 5–6 | model inspection checklist and code-reading paths |
+| 7–8 | controlled evaluations and exit criterion |
 
 ---
 
@@ -251,7 +271,7 @@ capacity_factor / drop policy
 ```
 
 The complete MoE systems path is in
-[`04-moe-deep-dive.md`](04-moe-deep-dive.md). The central warning is:
+[`07-distributed-inference-moe.md`](07-distributed-inference-moe.md). The central warning is:
 
 > Sparse FLOPs do not imply sparse memory, communication, or latency.
 
@@ -421,7 +441,7 @@ architecture feature.
 
 ---
 
-## 5. How to inspect an unfamiliar model in 30 minutes
+## 5. Fixed Checklist for Inspecting an Unfamiliar Model
 
 ### Step 1 — Read config, not marketing
 
@@ -525,7 +545,7 @@ Model definition tells semantics; serving engine tells the actual execution. Com
 
 ---
 
-## 7. Architecture experiments
+## 7. Controlled Architecture Evaluations
 
 ### A1 — KV head sweep
 
@@ -615,7 +635,7 @@ After completing this chapter, you should be able to analyze a new model configu
 4. predict the main prefill and decode bottlenecks;
 5. find the corresponding Hugging Face semantics, reference implementation, and production-engine
    paths;
-6. design a controlled experiment that does not conflate model size, quality, and architecture
+6. design a controlled comparison that does not conflate model size, quality, and architecture
    feature.
 
 ## Primary papers
@@ -626,3 +646,9 @@ Local PDFs are in [`../ARCHITECTURE/`](../ARCHITECTURE/README.md). Key papers in
 - Mistral, Llama 3, Qwen3, DeepSeek-V2/V3;
 - Mamba/Mamba-2, RetNet, RWKV, Griffin;
 - YaRN, LongRoPE, Multi-token Prediction.
+
+---
+
+**Previous:** [`02-transformer-foundations.md`](02-transformer-foundations.md) ·
+**Next:** [`04-gpu-compiler-kernels.md`](04-gpu-compiler-kernels.md) ·
+**MoE deep dive:** [`07-distributed-inference-moe.md`](07-distributed-inference-moe.md)

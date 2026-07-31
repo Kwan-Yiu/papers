@@ -5,15 +5,23 @@ designed for database and systems researchers moving into LLM inference.
 
 ## Start here
 
-1. [`ROADMAP/00-roadmap.md`](ROADMAP/00-roadmap.md) — complete research roadmap and review of the original draft;
-2. [`ROADMAP/01-competency-plan.md`](ROADMAP/01-competency-plan.md) — prerequisite-driven competency plan;
-3. [`ROADMAP/02-research-projects.md`](ROADMAP/02-research-projects.md) — research project ladder;
-4. [`ROADMAP/03-architecture-taxonomy.md`](ROADMAP/03-architecture-taxonomy.md) — fine-grained architecture taxonomy;
-5. [`ROADMAP/04-moe-deep-dive.md`](ROADMAP/04-moe-deep-dive.md) — end-to-end MoE deep dive;
-6. [`ROADMAP/05-inference-systems-taxonomy.md`](ROADMAP/05-inference-systems-taxonomy.md) — full inference-systems taxonomy;
-7. [`ROADMAP/06-bottleneck-research-map.md`](ROADMAP/06-bottleneck-research-map.md) — bottleneck and research map;
-8. [`RESOURCES/GITHUB-REPO-ATLAS.md`](RESOURCES/GITHUB-REPO-ATLAS.md) — categorized GitHub repository atlas;
-9. [`RESOURCES/README.md`](RESOURCES/README.md) — local course, paper, and source-code entry points.
+| Entry | Purpose |
+|---|---|
+| [`ROADMAP/README.md`](ROADMAP/README.md) | roadmap document map and navigation |
+| [`ROADMAP/00-roadmap.md`](ROADMAP/00-roadmap.md) | complete field map, cost model, and entry points |
+| [`ROADMAP/01-ai-ml-foundations.md`](ROADMAP/01-ai-ml-foundations.md) | AI/ML concepts, mathematics, neural networks, and PyTorch |
+| [`ROADMAP/02-transformer-foundations.md`](ROADMAP/02-transformer-foundations.md) | Transformer mechanics and Hugging Face Transformers |
+| [`ROADMAP/03-modern-llm-architecture.md`](ROADMAP/03-modern-llm-architecture.md) | modern architecture → memory, compute, kernel, and communication costs |
+| [`ROADMAP/04-gpu-compiler-kernels.md`](ROADMAP/04-gpu-compiler-kernels.md) | GPU execution, profiling, compilers, and kernels |
+| [`ROADMAP/05-single-node-inference-engine.md`](ROADMAP/05-single-node-inference-engine.md) | complete single-node engine request and state path |
+| [`ROADMAP/06-kv-scheduling-serving.md`](ROADMAP/06-kv-scheduling-serving.md) | KV/state, scheduling, decoding, and serving |
+| [`ROADMAP/07-distributed-inference-moe.md`](ROADMAP/07-distributed-inference-moe.md) | dense parallelism, communication, MoE, and expert parallelism |
+| [`ROADMAP/08-production-reliability.md`](ROADMAP/08-production-reliability.md) | production observability, overload, recovery, isolation, and cost |
+| [`ROADMAP/09-bottleneck-research.md`](ROADMAP/09-bottleneck-research.md) | bottleneck classes, research questions, and evidence standards |
+| [`ROADMAP/10-research-projects.md`](ROADMAP/10-research-projects.md) | bounded systems-research project catalog |
+| [`ROADMAP/COMPETENCY-GATES.md`](ROADMAP/COMPETENCY-GATES.md) | cross-cutting required evidence and exit gates |
+| [`RESOURCES/GITHUB-REPO-ATLAS.md`](RESOURCES/GITHUB-REPO-ATLAS.md) | categorized English GitHub repository atlas |
+| [`RESOURCES/README.md`](RESOURCES/README.md) | local course, paper, and source-code entry points |
 
 ## Library
 
