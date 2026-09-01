@@ -30,7 +30,6 @@ file names are `[VENUE'YEAR] SHORTNAME.pdf`.
 ## GRAPH · Graph / proximity-graph indexes · `GRAPH/`
 - [SIGMOD'2025] **ACCELERATINGHIGH** — Accelerating High-Dimensional ANN Search via Skipping Redundant Distance Computations
 - 🆕 [VLDB'2026] **ANNIE** — ANNiE: A Learned Query Cost Estimator for Graph-Based Approximate Nearest Neighbor Search
-- 🆕 [VLDB'2026] **BBC** — BBC: Improving Large-k Approximate Nearest Neighbor Search with a Bucket-based Result Collector
 - 🆕 [VLDB'2026] **CONDA** — CONDA: A Connectivity-Aware Dynamic Index for Approximate Nearest Neighbor Search over Evolving Data
 - [SIGMOD'2026] **DAE-HNSW** — Distribution-Aware Exploration for Adaptive HNSW Search
 - [SIGMOD'2025] **DDFH** — Dynamically Detect and Fix Hardness for Efficient Approximate Nearest Neighbor Search
@@ -74,6 +73,7 @@ file names are `[VENUE'YEAR] SHORTNAME.pdf`.
 - [SIGMOD'2025] **WOW** — WoW: A Window-to-Window Incremental Index for Range-Filtering Approximate Nearest Neighbor Search
 
 ## QUANT · Quantization / compression · `QUANT/`
+- 🆕 [VLDB'2026] **BBC** — BBC: Improving Large-k Approximate Nearest Neighbor Search with a Bucket-based Result Collector
 - 🆕 [VLDB'2026] **JHQ** — JHQ: Johnson-Lindenstrauss Enhanced Hierarchical Quantization for High-Dimensional Approximate Nearest Neighbor Search
 - [SIGMOD'2025] **OPTIMALQUANTIZATION** — Practical and Asymptotically Optimal Quantization of High-Dimensional Vectors in Euclidean Space for ANN Search
 - 🆕 [VLDB'2026] **QUANTPROJ** — Quantization Meets Projection: A Happy Marriage for Approximate k-Nearest Neighbor Search
